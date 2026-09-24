@@ -1,0 +1,2388 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum Hub | CBSE, JEE, SAT, AP</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- Markdown Parser -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    
+    <!-- Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <!-- Syntax Highlighting -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/tokyo-night-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+
+    <!-- Pyodide for Live Python Execution -->
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.23.4/full/pyodide.js"></script>
+    
+    <!-- CodeMirror for Code Editing -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/dracula.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/python/python.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Outfit', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        neon: { purple: '#b026ff', blue: '#00f0ff', pink: '#ff007f', green: '#39ff14' },
+                        dark: { bg: '#0a0a0f', surface: '#13131f', border: '#2a2a40' }
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'float': 'float 6s ease-in-out infinite',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #0a0a0f;
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(176, 38, 255, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 85% 30%, rgba(0, 240, 255, 0.08) 0%, transparent 50%);
+            background-attachment: fixed;
+            color: #e2e8f0;
+        }
+        .glass-panel { background: rgba(19, 19, 31, 0.6); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.05); box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1); }
+        .neon-border-purple { border: 1px solid rgba(176, 38, 255, 0.3); box-shadow: inset 0 0 10px rgba(176, 38, 255, 0.1), 0 0 10px rgba(176, 38, 255, 0.1); }
+        .neon-border-blue { border: 1px solid rgba(0, 240, 255, 0.3); box-shadow: inset 0 0 10px rgba(0, 240, 255, 0.1), 0 0 10px rgba(0, 240, 255, 0.1); }
+        .neon-text-gradient { background: linear-gradient(to right, #b026ff, #00f0ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .chat-markdown p { margin-bottom: 0.75rem; }
+        .chat-markdown pre { background: #1a1a2e; padding: 1rem; border-radius: 0.5rem; overflow-x: auto; margin-bottom: 0.75rem; }
+        .chat-markdown code { font-family: 'JetBrains Mono', monospace; font-size: 0.875rem; color: #00f0ff; }
+        .topic-checkbox { appearance: none; width: 22px; height: 22px; background-color: rgba(255,255,255,0.05); border: 1px solid #2a2a40; border-radius: 6px; cursor: pointer; position: relative; transition: all 0.2s; flex-shrink: 0; }
+        .topic-checkbox:checked { background-color: #b026ff; border-color: #b026ff; box-shadow: 0 0 10px rgba(176, 38, 255, 0.5); }
+        .topic-checkbox:checked::after { content: ""; position: absolute; left: 7px; top: 3px; width: 6px; height: 12px; border: solid white; border-width: 0 2px 2px 0; transform: rotate(45deg); }
+        .CodeMirror { position: absolute; top: 0; bottom: 0; left: 0; right: 0; height: 100%; background-color: transparent !important; font-family: 'JetBrains Mono', monospace; font-size: 0.875rem; }
+        .cm-s-dracula.CodeMirror { background-color: #1a1b26 !important; }
+        .matplotlib-plot-img { max-width: 100%; border-radius: 8px; margin-top: 10px; border: 1px solid rgba(255,255,255,0.1); }
+        .cert-paper { background: #ffffff; background-image: radial-gradient(#f1f5f9 1px, transparent 0); background-size: 20px 20px; color: #0f172a; position: relative; }
+        .cert-border-gold { border: 12px solid; border-image-slice: 1; border-width: 12px; border-image-source: linear-gradient(to right, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c); }
+        .cert-border-silver { border: 12px solid; border-image-slice: 1; border-width: 12px; border-image-source: linear-gradient(to right, #8e9eab, #eef2f3, #8e9eab); }
+        .cert-border-bronze { border: 12px solid; border-image-slice: 1; border-width: 12px; border-image-source: linear-gradient(to right, #cd7f32, #f3cd9e, #cd7f32); }
+        .cert-seal { position: absolute; bottom: 30px; right: 30px; width: 90px; height: 90px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2); font-size: 2.5rem; color: white; }
+    </style>
+</head>
+<body class="h-screen w-full flex overflow-hidden selection:bg-neon-purple selection:text-white relative">
+
+    <!-- Authentication Overlay -->
+    <div id="auth-overlay" class="fixed inset-0 z-[100] bg-dark-bg/95 backdrop-blur-md flex items-center justify-center transition-opacity duration-300">
+        <div class="glass-panel w-full max-w-md rounded-3xl border border-neon-purple/30 p-8 shadow-[0_0_30px_rgba(176,38,255,0.15)] relative overflow-hidden">
+            <div class="absolute -right-10 -top-10 w-32 h-32 bg-neon-purple/20 rounded-full blur-2xl pointer-events-none"></div>
+            
+            <div class="text-center mb-8 relative z-10">
+                <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-neon-purple to-neon-blue flex items-center justify-center mx-auto mb-4 shadow-[0_0_15px_rgba(176,38,255,0.4)]">
+                    <i class="fa-solid fa-atom text-white text-3xl"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-white tracking-wide">Quantum<span class="neon-text-gradient">Hub</span></h2>
+                <p class="text-sm text-slate-400 mt-1" id="auth-subtitle">Sign in to access your Cloud AI Lab</p>
+            </div>
+            
+            <form id="auth-form" onsubmit="handleAuth(event)" class="space-y-4 relative z-10">
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Email Address</label>
+                    <input type="email" id="auth-email" required placeholder="student@example.com" class="w-full bg-dark-bg/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-neon-purple transition-colors">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Password</label>
+                    <input type="password" id="auth-password" required placeholder="••••••••" class="w-full bg-dark-bg/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-neon-purple transition-colors">
+                </div>
+                <button type="submit" id="auth-submit-btn" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-neon-purple to-neon-blue text-white font-bold hover:shadow-[0_0_20px_rgba(176,38,255,0.5)] transition-all mt-6 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-right-to-bracket"></i> <span>Sign In to Cloud</span>
+                </button>
+            </form>
+            
+            <div class="mt-6 text-center relative z-10">
+                <button onclick="toggleAuthMode()" id="auth-toggle-btn" class="text-sm text-slate-400 hover:text-white transition-colors">
+                    Need an account? <span class="text-neon-blue font-bold">Sign Up</span>
+                </button>
+            </div>
+            <div class="mt-8 text-center border-t border-white/10 pt-4 relative z-10">
+                <p class="text-[10px] text-slate-500 font-mono tracking-widest">&copy; 2026 @janardhana-venkat-tushar</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase Setup -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        let firebaseConfig = null;
+        try { if (typeof __firebase_config !== 'undefined') firebaseConfig = JSON.parse(__firebase_config); } catch (e) {}
+        
+        if (!firebaseConfig || firebaseConfig.apiKey === "dummy") {
+            firebaseConfig = { apiKey: "dummy" };
+        }
+
+        const isSimulated = firebaseConfig.apiKey.includes("YOUR_") || firebaseConfig.apiKey === "dummy";
+        window.isSimulated = isSimulated;
+        
+        if (!isSimulated) {
+            const app = initializeApp(firebaseConfig);
+            window.auth = getAuth(app);
+            window.db = getFirestore(app);
+            window.appId = 'quantum-hub-cbse';
+            window.setDoc = setDoc;
+            window.doc = doc;
+            window.onSnapshot = onSnapshot;
+            window.signInWithEmailAndPassword = signInWithEmailAndPassword;
+            window.createUserWithEmailAndPassword = createUserWithEmailAndPassword;
+            window.signOut = signOut;
+
+            onAuthStateChanged(window.auth, (user) => {
+                const overlay = document.getElementById('auth-overlay');
+                if (user) {
+                    overlay.classList.add('opacity-0');
+                    setTimeout(() => overlay.classList.add('hidden'), 300);
+                    document.getElementById('nav-user-email').innerText = user.email.split('@')[0];
+                    window.initDataListener(user.uid);
+                } else {
+                    overlay.classList.remove('hidden');
+                    void overlay.offsetWidth; 
+                    overlay.classList.remove('opacity-0');
+                }
+            });
+        }
+    </script>
+
+    <!-- Global Toast System -->
+    <div id="toast-container" class="fixed top-4 right-4 z-[110] flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- Sidebar Navigation -->
+    <nav class="w-20 lg:w-64 h-full glass-panel border-r border-white/5 flex flex-col justify-between flex-shrink-0 transition-all duration-300 z-30 relative">
+        <div class="flex-1 overflow-y-auto no-scrollbar">
+            <div class="h-20 flex items-center justify-center lg:justify-start lg:px-6 border-b border-white/5 sticky top-0 bg-dark-bg/80 backdrop-blur-sm z-10">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-neon-purple to-neon-blue flex items-center justify-center shadow-[0_0_15px_rgba(176,38,255,0.4)]">
+                    <i class="fa-solid fa-atom text-white text-xl"></i>
+                </div>
+                <h1 class="hidden lg:block ml-3 font-bold text-xl tracking-wide">Quantum<span class="neon-text-gradient">Hub</span></h1>
+            </div>
+
+            <div class="flex flex-col gap-2 p-3 mt-2">
+                <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-btn active flex items-center p-3 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition-all group relative">
+                    <i class="fa-solid fa-chart-line text-lg lg:w-6 text-center group-hover:text-neon-blue transition-colors"></i>
+                    <span class="hidden lg:block ml-3 font-medium">Dashboard</span>
+                    <div class="absolute inset-y-0 left-0 w-1 bg-neon-blue rounded-r-md opacity-0 transition-opacity indicator"></div>
+                </button>
+                <button onclick="switchTab('subjects')" id="nav-subjects" class="nav-btn flex items-center p-3 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition-all group relative">
+                    <i class="fa-solid fa-book-journal-whills text-lg lg:w-6 text-center group-hover:text-neon-purple transition-colors"></i>
+                    <span class="hidden lg:block ml-3 font-medium">Syllabus Tracker</span>
+                    <div class="absolute inset-y-0 left-0 w-1 bg-neon-purple rounded-r-md opacity-0 transition-opacity indicator"></div>
+                </button>
+                
+                <div class="my-2 border-t border-white/5 w-full"></div>
+                <p class="hidden lg:block text-[10px] uppercase tracking-widest text-slate-600 font-bold ml-4 mb-1">Learning & Community</p>
+                
+                <button onclick="switchTab('community')" id="nav-community" class="nav-btn flex items-center p-3 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition-all group relative">
+                    <i class="fa-solid fa-users text-lg lg:w-6 text-center group-hover:text-green-400 transition-colors"></i>
+                    <span class="hidden lg:block ml-3 font-medium">Community Q&A</span>
+                    <div class="absolute inset-y-0 left-0 w-1 bg-green-400 rounded-r-md opacity-0 transition-opacity indicator"></div>
+                </button>
+                <button onclick="switchTab('library')" id="nav-library" class="nav-btn flex items-center p-3 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition-all group relative">
+                    <i class="fa-solid fa-layer-group text-lg lg:w-6 text-center group-hover:text-blue-400 transition-colors"></i>
+                    <span class="hidden lg:block ml-3 font-medium">Official Library</span>
+                    <div class="absolute inset-y-0 left-0 w-1 bg-blue-400 rounded-r-md opacity-0 transition-opacity indicator"></div>
+                </button>
+                <button onclick="switchTab('archive')" id="nav-archive" class="nav-btn flex items-center p-3 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition-all group relative">
+                    <i class="fa-solid fa-file-shield text-lg lg:w-6 text-center group-hover:text-amber-400 transition-colors"></i>
+                    <span class="hidden lg:block ml-3 font-medium">PYQ Archive</span>
+                    <div class="absolute inset-y-0 left-0 w-1 bg-amber-400 rounded-r-md opacity-0 transition-opacity indicator"></div>
+                </button>
+                <button onclick="switchTab('lab')" id="nav-lab" class="nav-btn flex items-center p-3 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition-all group relative">
+                    <i class="fa-solid fa-flask text-lg lg:w-6 text-center group-hover:text-neon-green transition-colors"></i>
+                    <span class="hidden lg:block ml-3 font-medium">Live CS/AI Lab</span>
+                    <div class="absolute inset-y-0 left-0 w-1 bg-neon-green rounded-r-md opacity-0 transition-opacity indicator"></div>
+                </button>
+                <button onclick="switchTab('projects')" id="nav-projects" class="nav-btn flex items-center p-3 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition-all group relative">
+                    <i class="fa-solid fa-lightbulb text-lg lg:w-6 text-center group-hover:text-yellow-400 transition-colors"></i>
+                    <span class="hidden lg:block ml-3 font-medium">Capstone Projects</span>
+                    <div class="absolute inset-y-0 left-0 w-1 bg-yellow-400 rounded-r-md opacity-0 transition-opacity indicator"></div>
+                </button>
+                
+                <div class="my-2 border-t border-white/5 w-full"></div>
+                <p class="hidden lg:block text-[10px] uppercase tracking-widest text-slate-600 font-bold ml-4 mb-1">Evaluation</p>
+
+                <button onclick="switchTab('assessments')" id="nav-assessments" class="nav-btn flex items-center p-3 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition-all group relative">
+                    <i class="fa-solid fa-clipboard-question text-lg lg:w-6 text-center group-hover:text-red-400 transition-colors"></i>
+                    <span class="hidden lg:block ml-3 font-medium">Assessments</span>
+                    <div class="absolute inset-y-0 left-0 w-1 bg-red-400 rounded-r-md opacity-0 transition-opacity indicator"></div>
+                </button>
+                <button onclick="switchTab('leaderboard')" id="nav-leaderboard" class="nav-btn flex items-center p-3 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition-all group relative">
+                    <i class="fa-solid fa-trophy text-lg lg:w-6 text-center group-hover:text-yellow-400 transition-colors"></i>
+                    <span class="hidden lg:block ml-3 font-medium">Leaderboard</span>
+                    <div class="absolute inset-y-0 left-0 w-1 bg-yellow-400 rounded-r-md opacity-0 transition-opacity indicator"></div>
+                </button>
+                <button onclick="switchTab('certificates')" id="nav-certificates" class="nav-btn flex items-center p-3 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition-all group relative">
+                    <i class="fa-solid fa-award text-lg lg:w-6 text-center group-hover:text-yellow-400 transition-colors"></i>
+                    <span class="hidden lg:block ml-3 font-medium">Certificates</span>
+                    <div class="absolute inset-y-0 left-0 w-1 bg-yellow-400 rounded-r-md opacity-0 transition-opacity indicator"></div>
+                </button>
+                <button onclick="switchTab('tutor')" id="nav-tutor" class="nav-btn flex items-center p-3 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition-all group relative">
+                    <i class="fa-solid fa-robot text-lg lg:w-6 text-center group-hover:text-neon-pink transition-colors"></i>
+                    <span class="hidden lg:block ml-3 font-medium">Gemini AI Tutor</span>
+                    <div class="absolute inset-y-0 left-0 w-1 bg-neon-pink rounded-r-md opacity-0 transition-opacity indicator"></div>
+                </button>
+                
+                <!-- SECRET ADMIN DASHBOARD BUTTON -->
+                <button onclick="switchTab('admin')" id="nav-admin" class="nav-btn hidden flex items-center p-3 rounded-xl hover:bg-white/5 text-amber-500 hover:text-amber-400 transition-all group relative mt-4 border border-amber-500/30 bg-amber-500/10">
+                    <i class="fa-solid fa-shield-halved text-lg lg:w-6 text-center group-hover:text-amber-300 transition-colors"></i>
+                    <span class="hidden lg:block ml-3 font-bold">Admin Panel</span>
+                    <div class="absolute inset-y-0 left-0 w-1 bg-amber-400 rounded-r-md opacity-0 transition-opacity indicator"></div>
+                </button>
+            </div>
+        </div>
+
+        <div class="p-4 border-t border-white/5 flex flex-col gap-3 bg-dark-bg/80 backdrop-blur-sm z-10">
+            <div class="flex items-center justify-center lg:justify-start">
+                <div class="w-10 h-10 rounded-full bg-dark-border border border-white/10 flex items-center justify-center relative flex-shrink-0">
+                    <i class="fa-solid fa-user-astronaut text-slate-300"></i>
+                    <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-neon-green rounded-full border-2 border-dark-bg"></div>
+                </div>
+                <div class="hidden lg:block ml-3 w-full">
+                    <div class="flex justify-between items-center w-full">
+                        <p class="text-sm font-semibold text-white truncate max-w-[90px]" id="nav-user-email">Student</p>
+                        <button onclick="logoutUser()" class="text-xs text-red-400 hover:text-red-300 ml-1 p-1 rounded hover:bg-red-400/10 transition-colors" title="Logout">
+                            <i class="fa-solid fa-right-from-bracket"></i>
+                        </button>
+                    </div>
+                    <div class="flex justify-between items-center w-full mt-0.5">
+                        <p class="text-xs text-neon-blue">Lvl <span id="nav-level-display">1</span></p>
+                        <select id="track-selector" onchange="changeTrack(this.value)" class="bg-dark-surface border border-white/10 text-[10px] text-slate-300 rounded px-1 py-0.5 outline-none focus:border-neon-blue max-w-[75px]">
+                            <option value="CBSE_11">CBSE 11</option>
+                            <option value="CBSE_12">CBSE 12</option>
+                            <option value="JEE_MAIN">JEE Main</option>
+                            <option value="JEE_ADV">JEE Adv</option>
+                            <option value="SAT">SAT</option>
+                            <option value="AP">AP</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="hidden lg:block text-center mt-1">
+                <p class="text-[9px] text-slate-500 font-mono">&copy; 2026 @janardhana-venkat-tushar</p>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 h-full overflow-y-auto no-scrollbar relative">
+        <div class="absolute top-0 right-0 w-[500px] h-[500px] bg-neon-purple/5 rounded-full blur-[100px] -z-10 pointer-events-none"></div>
+        <div class="absolute bottom-0 left-1/4 w-[400px] h-[400px] bg-neon-blue/5 rounded-full blur-[100px] -z-10 pointer-events-none"></div>
+
+        <div class="p-6 lg:p-10 max-w-7xl mx-auto min-h-full">
+            
+            <!-- DASHBOARD TAB -->
+            <div id="tab-dashboard" class="tab-content block animate-fade-in">
+                <header class="mb-10">
+                    <h2 class="text-3xl font-bold mb-2">Welcome back to the <span class="neon-text-gradient">Quantum Hub</span></h2>
+                    <p class="text-slate-400">Your central command for academic mastery.</p>
+                </header>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+                    <!-- XP Card -->
+                    <div class="glass-panel rounded-3xl p-6 relative overflow-hidden group">
+                        <div class="absolute -right-6 -top-6 w-32 h-32 bg-neon-purple/20 rounded-full blur-2xl group-hover:bg-neon-purple/30 transition-all"></div>
+                        <h3 class="text-slate-400 text-sm font-semibold uppercase tracking-wider mb-2">Total Experience</h3>
+                        <div class="flex items-end gap-2">
+                            <span class="text-5xl font-black text-white" id="dash-xp">0</span>
+                            <span class="text-neon-purple font-bold mb-1 border border-neon-purple/30 bg-neon-purple/10 px-2 py-0.5 rounded text-sm">XP</span>
+                        </div>
+                        <div class="mt-6 w-full h-2 bg-dark-border rounded-full overflow-hidden">
+                            <div id="dash-xp-bar" class="h-full bg-gradient-to-r from-neon-purple to-neon-pink w-0 transition-all duration-1000 shadow-[0_0_10px_rgba(176,38,255,0.8)]"></div>
+                        </div>
+                        <p class="text-xs text-slate-500 mt-2 text-right"><span id="dash-xp-needed">1000</span> XP to next level</p>
+                    </div>
+
+                    <!-- Level Card -->
+                    <div class="glass-panel rounded-3xl p-6 relative overflow-hidden group neon-border-blue">
+                        <div class="absolute -right-6 -top-6 w-32 h-32 bg-neon-blue/20 rounded-full blur-2xl group-hover:bg-neon-blue/30 transition-all"></div>
+                        <h3 class="text-slate-400 text-sm font-semibold uppercase tracking-wider mb-2">Current Level</h3>
+                        <div class="flex items-center gap-4 mt-2">
+                            <div class="w-16 h-16 rounded-full bg-dark-bg border-2 border-neon-blue flex items-center justify-center shadow-[0_0_15px_rgba(0,240,255,0.5)]">
+                                <span class="text-3xl font-black text-neon-blue animate-pulse-slow" id="dash-level">1</span>
+                            </div>
+                            <div>
+                                <p class="font-bold text-lg text-white">Quantum Novice</p>
+                                <p class="text-sm text-slate-400">Keep grinding topics to rank up.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Streak Card -->
+                    <div class="glass-panel rounded-3xl p-6 relative overflow-hidden group">
+                        <div class="absolute -right-6 -top-6 w-32 h-32 bg-orange-500/20 rounded-full blur-2xl group-hover:bg-orange-500/30 transition-all"></div>
+                        <h3 class="text-slate-400 text-sm font-semibold uppercase tracking-wider mb-2 flex justify-between">
+                            <span>Study Streak</span>
+                            <span class="text-[10px] text-orange-400 bg-orange-500/10 px-2 py-0.5 rounded">+50 XP / Day</span>
+                        </h3>
+                        <div class="flex items-center gap-3">
+                            <i class="fa-solid fa-fire text-5xl text-orange-500 drop-shadow-[0_0_15px_rgba(249,115,22,0.6)] animate-float"></i>
+                            <div>
+                                <span class="text-4xl font-black text-white" id="dash-streak">0</span>
+                                <span class="text-slate-300 ml-1 text-lg">Days</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <h3 class="text-xl font-bold mb-6 flex items-center"><i class="fa-solid fa-cloud-arrow-down mr-2 text-cyan-400"></i> Connected Accounts & Sync</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+                    <div class="glass-panel rounded-2xl p-5 border border-white/5 flex flex-col group hover:border-green-400/30 transition-colors">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center gap-4">
+                                <div class="w-12 h-12 rounded-xl bg-green-500/20 flex items-center justify-center text-green-400 text-2xl">
+                                    <i class="fa-solid fa-leaf"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-white">Khan Academy</h4>
+                                    <p class="text-xs text-slate-400" id="status-khan">Not linked</p>
+                                </div>
+                            </div>
+                            <input type="file" id="upload-khan" class="hidden" accept=".pdf,.csv" onchange="handleReportUpload('khan', event)">
+                            <button id="btn-sync-khan" onclick="document.getElementById('upload-khan').click()" class="px-4 py-2 rounded-lg text-xs font-bold bg-white/10 hover:bg-green-500 hover:text-dark-bg transition-colors flex items-center gap-2">
+                                <i class="fa-solid fa-file-arrow-up"></i> Upload Report
+                            </button>
+                        </div>
+                        <!-- Hidden Sync Data Panel -->
+                        <div id="khan-stats" class="hidden mt-2 pt-4 border-t border-white/10 grid grid-cols-2 gap-4">
+                            <div><p class="text-xs text-slate-400 uppercase tracking-wider">Course Mastery</p><p class="text-xl font-bold text-green-400"><span id="stat-khan-mastery">--</span>%</p></div>
+                            <div><p class="text-xs text-slate-400 uppercase tracking-wider">Mins Studied Today</p><p class="text-xl font-bold text-white"><span id="stat-khan-mins">--</span> m</p></div>
+                        </div>
+                    </div>
+                    
+                    <div class="glass-panel rounded-2xl p-5 border border-white/5 flex flex-col group hover:border-blue-400/30 transition-colors">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center gap-4">
+                                <div class="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center text-blue-400 text-2xl">
+                                    <i class="fa-solid fa-building-columns"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-white">College Board</h4>
+                                    <p class="text-xs text-slate-400" id="status-cb">Not linked</p>
+                                </div>
+                            </div>
+                            <input type="file" id="upload-cb" class="hidden" accept=".pdf,.csv" onchange="handleReportUpload('cb', event)">
+                            <button id="btn-sync-cb" onclick="document.getElementById('upload-cb').click()" class="px-4 py-2 rounded-lg text-xs font-bold bg-white/10 hover:bg-blue-500 hover:text-dark-bg transition-colors flex items-center gap-2">
+                                <i class="fa-solid fa-file-arrow-up"></i> Upload Score
+                            </button>
+                        </div>
+                         <!-- Hidden Sync Data Panel -->
+                        <div id="cb-stats" class="hidden mt-2 pt-4 border-t border-white/10 grid grid-cols-2 gap-4">
+                            <div><p class="text-xs text-slate-400 uppercase tracking-wider">SAT Practice Score</p><p class="text-xl font-bold text-blue-400" id="stat-cb-sat">--</p></div>
+                            <div><p class="text-xs text-slate-400 uppercase tracking-wider">AP Calc Practice</p><p class="text-xl font-bold text-white"><span id="stat-cb-ap">--</span> / 5</p></div>
+                        </div>
+                    </div>
+                </div>
+
+                <h3 class="text-xl font-bold mb-6 flex items-center"><i class="fa-solid fa-stopwatch mr-2 text-neon-pink"></i> Advanced Focus Timer</h3>
+                <div class="glass-panel rounded-3xl p-6 mb-10 border border-white/5 flex flex-col lg:flex-row items-center justify-between gap-6 relative overflow-hidden group">
+                    <div class="absolute -left-10 -bottom-10 w-40 h-40 bg-neon-pink/10 rounded-full blur-3xl pointer-events-none transition-all group-hover:bg-neon-pink/20"></div>
+                    <div class="flex-1 relative z-10 w-full lg:w-auto">
+                        <h4 class="font-bold text-white text-lg mb-2">Deep Work Sessions</h4>
+                        <p class="text-sm text-slate-400 mb-4 max-w-xl">Choose a technique that fits your mindset today. Track your subjects to unlock massive XP bonuses!</p>
+                        
+                        <div class="bg-dark-bg/80 border border-white/10 p-4 rounded-xl mb-4">
+                            <p class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Select Subject You Are Studying:</p>
+                            <select id="pomodoro-subject" class="w-full bg-dark-surface border border-white/10 text-sm text-white rounded-lg px-3 py-2 outline-none focus:border-neon-pink mb-3">
+                                <!-- Populated dynamically based on track -->
+                            </select>
+                        </div>
+
+                        <!-- Different Study Techniques -->
+                        <div class="space-y-3">
+                            <div>
+                                <p class="text-[10px] text-slate-500 uppercase tracking-widest font-bold mb-1">Standard</p>
+                                <div class="flex flex-wrap gap-2">
+                                    <button onclick="setTimerMode(25)" id="btn-timer-25" class="px-4 py-2 rounded-xl text-xs font-bold bg-neon-pink/20 text-neon-pink border border-neon-pink/30 hover:bg-neon-pink/30 transition-colors ring-2 ring-white scale-105">Pomodoro (25m)</button>
+                                </div>
+                            </div>
+                            <div>
+                                <p class="text-[10px] text-slate-500 uppercase tracking-widest font-bold mb-1">Flexibility & Motivation</p>
+                                <div class="flex flex-wrap gap-2">
+                                    <button onclick="setTimerMode(40)" id="btn-timer-40" class="px-4 py-2 rounded-xl text-xs font-bold bg-neon-purple/20 text-neon-purple border border-neon-purple/30 hover:bg-neon-purple/30 transition-colors">Animedoro (40m)</button>
+                                    <button onclick="setTimerMode(90)" id="btn-timer-90" class="px-4 py-2 rounded-xl text-xs font-bold bg-neon-green/20 text-neon-green border border-neon-green/30 hover:bg-neon-green/30 transition-colors">Ultradian Rhythm (90m)</button>
+                                </div>
+                            </div>
+                            <div>
+                                <p class="text-[10px] text-slate-500 uppercase tracking-widest font-bold mb-1">Rest & Reward</p>
+                                <div class="flex flex-wrap gap-2">
+                                    <button onclick="setTimerMode(5)" id="btn-timer-5" class="px-4 py-2 rounded-xl text-xs font-bold bg-neon-blue/20 text-neon-blue border border-neon-blue/30 hover:bg-neon-blue/30 transition-colors">Short Break (5m)</button>
+                                    <button onclick="setTimerMode(20)" id="btn-timer-20" class="px-4 py-2 rounded-xl text-xs font-bold bg-blue-500/20 text-blue-400 border border-blue-500/30 hover:bg-blue-500/30 transition-colors">Anime Break (20m)</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Circular Glowing Timer UI -->
+                    <div class="flex flex-col items-center p-6 bg-dark-bg/80 rounded-2xl border border-white/10 min-w-[280px] relative z-10 shadow-inner w-full lg:w-auto">
+                        <div class="relative w-48 h-48 flex items-center justify-center mb-6">
+                            <!-- Background Track -->
+                            <svg class="w-full h-full transform -rotate-90 absolute inset-0">
+                                <circle cx="96" cy="96" r="88" stroke="rgba(255,255,255,0.05)" stroke-width="8" fill="transparent" />
+                                <!-- Progress Ring (Circumference = 2 * pi * 88 = 552.92) -->
+                                <circle id="timer-ring" cx="96" cy="96" r="88" stroke="#ff007f" stroke-width="8" fill="transparent" stroke-dasharray="552.92" stroke-dashoffset="0" class="transition-all duration-1000 ease-linear drop-shadow-[0_0_15px_rgba(255,0,127,0.6)]" stroke-linecap="round"/>
+                            </svg>
+                            <!-- Time Display -->
+                            <div class="text-5xl font-black text-white font-mono tracking-widest relative z-10" id="timer-display">25:00</div>
+                        </div>
+
+                        <div class="flex gap-3 w-full">
+                            <button id="timer-start-btn" onclick="startTimer()" class="flex-1 py-3 rounded-xl bg-neon-green text-dark-bg font-bold hover:bg-green-400 transition-all flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-play"></i> Start
+                            </button>
+                            <button onclick="pauseTimer()" class="w-12 py-3 rounded-xl bg-white/10 text-white font-bold hover:bg-white/20 transition-colors flex items-center justify-center"><i class="fa-solid fa-pause"></i></button>
+                            <button onclick="resetTimer()" class="w-12 py-3 rounded-xl bg-white/10 text-white font-bold hover:bg-white/20 transition-colors flex items-center justify-center"><i class="fa-solid fa-rotate-right"></i></button>
+                        </div>
+                        <p class="text-xs text-slate-500 mt-4 font-mono">Sessions today: <span id="pomo-count-display" class="text-white">0</span></p>
+                    </div>
+                </div>
+
+                <h3 class="text-xl font-bold mb-6 flex items-center"><i class="fa-solid fa-chart-pie mr-2 text-neon-blue"></i> Syllabus Mastery</h3>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6" id="dashboard-progress-grid"></div>
+            </div>
+
+            <!-- SUBJECTS TAB -->
+            <div id="tab-subjects" class="tab-content hidden animate-fade-in">
+                <header class="mb-10 flex flex-col md:flex-row justify-between md:items-end gap-4">
+                    <div>
+                        <h2 class="text-3xl font-bold mb-2">Subject <span class="neon-text-gradient">Tracker</span></h2>
+                        <p class="text-slate-400">Check off official curriculum topics. Master them completely or use AI to clear doubts.</p>
+                    </div>
+                    <div class="flex bg-dark-border p-1 rounded-xl items-center px-4 py-2">
+                         <span class="text-sm text-slate-300 mr-2">Current Track:</span>
+                         <span class="text-neon-blue font-bold" id="subject-grade-display">CBSE 12</span>
+                    </div>
+                </header>
+                <div class="space-y-6" id="subjects-container"></div>
+            </div>
+            
+            <!-- COMMUNITY TAB -->
+            <div id="tab-community" class="tab-content hidden animate-fade-in h-full flex flex-col pb-10">
+                <header class="mb-6 border-b border-white/5 pb-6">
+                    <h2 class="text-3xl font-bold mb-2">Quantum <span class="text-green-400">Community Q&A</span></h2>
+                    <p class="text-slate-400">Ask doubts and help your peers master difficult concepts together.</p>
+                </header>
+                
+                <div class="flex flex-col lg:flex-row gap-6 flex-1">
+                    <div class="lg:w-1/3 glass-panel rounded-3xl p-6 border border-white/5 flex flex-col">
+                        <h3 class="font-bold text-white mb-4"><i class="fa-solid fa-pen-to-square text-green-400 mr-2"></i> Ask the Community</h3>
+                        <textarea id="community-post-input" class="w-full bg-dark-bg border border-white/10 rounded-xl p-4 text-sm text-slate-200 focus:outline-none focus:border-green-400/50 resize-none h-32 mb-4" placeholder="Stuck on a problem? Ask here..."></textarea>
+                        <button onclick="postToCommunity()" class="w-full py-3 rounded-xl bg-green-500 text-dark-bg font-bold hover:bg-green-400 transition-colors shadow-[0_0_15px_rgba(74,222,128,0.3)]">Post Question</button>
+                    </div>
+                    
+                    <div class="lg:w-2/3 glass-panel rounded-3xl p-6 border border-white/5 flex flex-col h-full lg:h-[600px]">
+                        <div class="flex justify-between items-center mb-4 border-b border-white/10 pb-4">
+                            <h3 class="font-bold text-white"><i class="fa-solid fa-comments text-blue-400 mr-2"></i> Recent Discussions</h3>
+                            <span class="text-xs bg-white/5 px-2 py-1 rounded text-slate-400">Live Feed</span>
+                        </div>
+                        <div id="community-feed" class="flex-1 overflow-y-auto no-scrollbar space-y-4 pr-2">
+                            <!-- Populated dynamically via JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LIBRARY / RESOURCES TAB -->
+            <div id="tab-library" class="tab-content hidden animate-fade-in">
+                <header class="mb-10 flex flex-col md:flex-row justify-between md:items-end gap-4">
+                    <div>
+                        <h2 class="text-3xl font-bold mb-2">Official <span class="neon-text-gradient">Library & Knowledge Base</span></h2>
+                        <p class="text-slate-400">Official textbooks and your custom AI-ingested knowledge.</p>
+                    </div>
+                    <button onclick="openCustomResourceModal()" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-neon-purple to-neon-blue text-white font-bold hover:shadow-[0_0_15px_rgba(0,240,255,0.4)] transition-all flex items-center gap-2">
+                        <i class="fa-solid fa-brain"></i> Train AI / Add Source
+                    </button>
+                </header>
+                <div id="library-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+            </div>
+
+            <!-- ASSESSMENTS TAB -->
+            <div id="tab-assessments" class="tab-content hidden animate-fade-in h-full flex flex-col pb-10">
+                <header class="mb-6">
+                    <h2 class="text-3xl font-bold mb-2">Quantum <span class="neon-text-gradient">Assessments</span></h2>
+                    <p class="text-slate-400">Personalized tests generated from Previous Year Questions (PYQs).</p>
+                </header>
+
+                <div id="assessment-home" class="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1">
+                    <div class="lg:col-span-2 glass-panel p-8 rounded-3xl border border-white/5 flex flex-col items-center justify-center text-center">
+                        <div class="w-20 h-20 bg-red-500/10 rounded-full flex items-center justify-center mb-4 border border-red-500/20">
+                            <i class="fa-solid fa-file-pen text-3xl text-red-400"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold text-white mb-2">Ready to test your knowledge?</h3>
+                        <p class="text-slate-400 max-w-md mb-6">Head over to the <strong class="text-white">Syllabus Tracker</strong> tab and click the <i class="fa-solid fa-bullseye text-red-400 mx-1"></i> icon next to any completed topic to generate a personalized test.</p>
+                    </div>
+                    <div class="glass-panel p-6 rounded-3xl border border-white/5 flex flex-col">
+                        <h3 class="font-bold text-white mb-4"><i class="fa-solid fa-chart-simple text-red-400 mr-2"></i>Performance Stats</h3>
+                        <div class="flex-1 space-y-4">
+                            <div class="bg-dark-bg rounded-xl p-4 flex justify-between items-center border border-white/5">
+                                <span class="text-slate-400 text-sm">Tests Taken</span>
+                                <span class="text-xl font-bold text-white" id="stats-tests-taken">0</span>
+                            </div>
+                            <div class="bg-dark-bg rounded-xl p-4 flex justify-between items-center border border-white/5">
+                                <span class="text-slate-400 text-sm">Average Score</span>
+                                <span class="text-xl font-bold text-neon-green" id="stats-avg-score">0%</span>
+                            </div>
+                            <div class="mt-6">
+                                <h4 class="text-xs uppercase tracking-wider text-slate-500 mb-3">Recent Tests</h4>
+                                <div id="recent-tests-list" class="space-y-2 text-sm"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="assessment-arena" class="hidden flex-1 flex flex-col lg:flex-row gap-6 relative">
+                    <div id="test-generating-overlay" class="absolute inset-0 z-20 glass-panel rounded-3xl flex flex-col items-center justify-center hidden">
+                        <div class="w-16 h-16 border-4 border-dark-bg border-t-red-500 rounded-full animate-spin mb-4"></div>
+                        <h3 class="text-xl font-bold text-white mb-2 animate-pulse">Generating via Gemini AI...</h3>
+                    </div>
+                    <div class="lg:w-1/2 glass-panel rounded-3xl flex flex-col border border-red-500/30 overflow-hidden shadow-[0_0_20px_rgba(248,113,113,0.1)]">
+                        <div class="bg-red-500/10 border-b border-red-500/20 p-4 flex justify-between items-center">
+                            <div>
+                                <h3 class="font-bold text-white" id="arena-test-title">Topic Test</h3>
+                                <p class="text-xs text-red-300" id="arena-test-subtitle">Physics</p>
+                            </div>
+                        </div>
+                        <div class="flex-1 p-6 overflow-y-auto no-scrollbar chat-markdown text-slate-200" id="arena-test-content"></div>
+                    </div>
+                    <div class="lg:w-1/2 glass-panel rounded-3xl flex flex-col border border-white/10 overflow-hidden">
+                        <div class="flex-1 p-4 flex flex-col">
+                            <textarea id="arena-answer-input" class="w-full flex-1 bg-dark-bg border border-white/10 rounded-xl p-4 text-slate-200 focus:outline-none focus:border-red-400/50 resize-none mb-4" placeholder="Type your answers..."></textarea>
+                            <button id="arena-submit-btn" onclick="submitAssessment()" class="w-full py-3 rounded-xl bg-gradient-to-r from-red-500 to-orange-500 text-white font-bold text-center hover:shadow-[0_0_20px_rgba(239,68,68,0.4)] transition-all">Submit for AI Grading</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="assessment-results" class="hidden flex-1 glass-panel rounded-3xl border border-neon-green/30 p-8 flex flex-col items-center">
+                    <div class="w-24 h-24 rounded-full bg-neon-green/10 flex items-center justify-center mb-6 border-2 border-neon-green">
+                        <span class="text-4xl font-black text-neon-green" id="result-score-display">--</span>
+                    </div>
+                    <h3 class="text-3xl font-bold text-white mb-2">Test Evaluated!</h3>
+                    <p class="text-slate-400 mb-8" id="result-xp-display">+0 XP Earned</p>
+                    <div class="w-full max-w-3xl bg-dark-bg rounded-2xl p-6 border border-white/5 mb-8 text-left chat-markdown" id="result-feedback-content"></div>
+                    <button onclick="closeAssessment()" class="px-8 py-3 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold transition-all">Return to Assessments</button>
+                </div>
+            </div>
+            
+            <!-- LEADERBOARD TAB -->
+            <div id="tab-leaderboard" class="tab-content hidden animate-fade-in h-full flex flex-col pb-10">
+                <header class="mb-6 flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
+                    <div>
+                        <h2 class="text-3xl font-bold mb-2">Global <span class="text-yellow-400">Leaderboard</span></h2>
+                        <p class="text-slate-400">Compete globally. Yearly rank requires 100% syllabus completion.</p>
+                    </div>
+                    <div class="flex bg-dark-bg rounded-xl border border-white/10 p-1">
+                        <button onclick="filterLeaderboard('daily')" class="lb-filter active px-4 py-2 text-sm font-bold text-yellow-400 bg-yellow-400/10 rounded-lg">Daily</button>
+                        <button onclick="filterLeaderboard('weekly')" class="lb-filter px-4 py-2 text-sm font-bold text-slate-400 hover:text-white rounded-lg">Weekly</button>
+                        <button onclick="filterLeaderboard('monthly')" class="lb-filter px-4 py-2 text-sm font-bold text-slate-400 hover:text-white rounded-lg">Monthly</button>
+                        <button onclick="filterLeaderboard('yearly')" class="lb-filter px-4 py-2 text-sm font-bold text-slate-400 hover:text-white rounded-lg">Yearly</button>
+                    </div>
+                </header>
+
+                <div class="flex-1 glass-panel rounded-3xl border border-white/5 p-6 flex flex-col">
+                    <!-- Podium -->
+                    <div class="flex justify-center items-end gap-2 md:gap-6 mb-10 h-48 mt-4">
+                        <!-- Rank 2 -->
+                        <div class="flex flex-col items-center w-24 md:w-32">
+                            <div class="w-12 h-12 rounded-full bg-slate-400 flex items-center justify-center text-white font-bold text-xl mb-2 shadow-[0_0_15px_rgba(148,163,184,0.5)] border-2 border-white">2</div>
+                            <p class="text-xs text-white font-bold truncate w-full text-center" id="podium-2-name">Student</p>
+                            <div class="w-full bg-gradient-to-t from-slate-600 to-slate-400 h-24 rounded-t-lg flex items-center justify-center text-white font-black text-xl">🥈</div>
+                        </div>
+                        <!-- Rank 1 -->
+                        <div class="flex flex-col items-center w-28 md:w-36">
+                            <div class="w-16 h-16 rounded-full bg-yellow-400 flex items-center justify-center text-dark-bg font-black text-3xl mb-2 shadow-[0_0_20px_rgba(250,204,21,0.6)] border-2 border-white">1</div>
+                            <p class="text-sm text-yellow-400 font-bold truncate w-full text-center" id="podium-1-name">Champion</p>
+                            <div class="w-full bg-gradient-to-t from-yellow-600 to-yellow-400 h-32 rounded-t-lg flex items-center justify-center text-white font-black text-2xl">🥇</div>
+                        </div>
+                        <!-- Rank 3 -->
+                        <div class="flex flex-col items-center w-24 md:w-32">
+                            <div class="w-12 h-12 rounded-full bg-orange-700 flex items-center justify-center text-white font-bold text-xl mb-2 shadow-[0_0_15px_rgba(194,65,12,0.5)] border-2 border-white">3</div>
+                            <p class="text-xs text-white font-bold truncate w-full text-center" id="podium-3-name">Achiever</p>
+                            <div class="w-full bg-gradient-to-t from-orange-800 to-orange-700 h-20 rounded-t-lg flex items-center justify-center text-white font-black text-xl">🥉</div>
+                        </div>
+                    </div>
+
+                    <!-- List -->
+                    <div class="flex-1 overflow-y-auto no-scrollbar space-y-2" id="leaderboard-list">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- CERTIFICATES & AWARDS TAB -->
+            <div id="tab-certificates" class="tab-content hidden animate-fade-in h-full flex flex-col pb-10">
+                <header class="mb-6 border-b border-white/5 pb-6">
+                    <h2 class="text-3xl font-bold mb-2">Awards & <span class="text-yellow-400">Certificates</span></h2>
+                    <p class="text-slate-400">Earn certificates by dominating the monthly leaderboard or completing 100% of your syllabus.</p>
+                </header>
+                
+                <div class="flex-1 overflow-y-auto no-scrollbar space-y-10 pb-10">
+                    <!-- Monthly Certificate Section -->
+                    <section>
+                        <h3 class="text-xl font-bold text-white mb-4 flex items-center"><i class="fa-solid fa-calendar-check text-neon-blue mr-2"></i> Monthly Top 3 Award</h3>
+                        <div id="monthly-cert-container" class="w-full"></div>
+                    </section>
+                    <!-- Yearly Syllabus Completion Medal Section -->
+                    <section>
+                        <h3 class="text-xl font-bold text-white mb-4 flex items-center"><i class="fa-solid fa-medal text-yellow-400 mr-2"></i> Yearly Syllabus Medal</h3>
+                        <div id="yearly-cert-container" class="w-full"></div>
+                    </section>
+                </div>
+            </div>
+
+            <!-- ARCHIVE TAB -->
+            <div id="tab-archive" class="tab-content hidden animate-fade-in">
+                <header class="mb-10">
+                    <h2 class="text-3xl font-bold mb-2">Exam <span class="neon-text-gradient">Archive</span></h2>
+                    <p class="text-slate-400">Previous Year Questions (PYQs) and Official Mock Papers.</p>
+                </header>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="archive-grid"></div>
+            </div>
+
+            <!-- LAB TAB -->
+            <div id="tab-lab" class="tab-content hidden animate-fade-in h-full flex flex-col pb-10">
+                <header class="mb-6">
+                    <h2 class="text-3xl font-bold mb-2">Live Python & CS <span class="neon-text-gradient">Lab</span></h2>
+                    <p class="text-slate-400">Write, edit, and execute CBSE Computer Science and AI scripts directly in your browser.</p>
+                </header>
+                <div class="flex-1 flex flex-col lg:flex-row gap-6 min-h-[600px] h-[70vh]">
+                    <div class="lg:w-1/4 glass-panel p-6 rounded-3xl border border-white/5 flex flex-col overflow-y-auto no-scrollbar">
+                        <h4 class="font-bold mb-4 text-white"><i class="fa-solid fa-book-bookmark text-neon-blue mr-2"></i> CBSE Practicals</h4>
+                        
+                        <p class="text-xs uppercase font-bold text-slate-500 mb-2 mt-2">Open Sandbox</p>
+                        <ul class="space-y-2 mb-4">
+                            <li class="flex items-center text-xs text-white cursor-pointer transition-colors p-2 rounded-xl bg-white/10 border border-white/20 shadow-[0_0_10px_rgba(255,255,255,0.1)]" onclick="loadSnippet('blank')">
+                                <div class="w-2 h-2 rounded-full bg-white mr-3 animate-pulse shadow-[0_0_8px_#ffffff]"></div> Blank Python Session
+                            </li>
+                        </ul>
+                        
+                        <p class="text-xs uppercase font-bold text-slate-500 mb-2 mt-2">AI / Machine Learning</p>
+                        <ul class="space-y-2 mb-4">
+                            <li class="flex items-center text-xs text-slate-300 hover:text-white cursor-pointer transition-colors p-2 rounded-xl hover:bg-white/5 border border-transparent hover:border-white/10" onclick="loadSnippet('knn')">
+                                <div class="w-2 h-2 rounded-full bg-neon-purple mr-3 shadow-[0_0_8px_#b026ff]"></div> KNN Classification
+                            </li>
+                            <li class="flex items-center text-xs text-slate-300 hover:text-white cursor-pointer transition-colors p-2 rounded-xl hover:bg-white/5 border border-transparent hover:border-white/10" onclick="loadSnippet('regression')">
+                                <div class="w-2 h-2 rounded-full bg-neon-blue mr-3 shadow-[0_0_8px_#00f0ff]"></div> Linear Regression
+                            </li>
+                        </ul>
+                        
+                        <p class="text-xs uppercase font-bold text-slate-500 mb-2">Computer Science</p>
+                        <ul class="space-y-2">
+                            <li class="flex items-center text-xs text-slate-300 hover:text-white cursor-pointer transition-colors p-2 rounded-xl hover:bg-white/5 border border-transparent hover:border-white/10" onclick="loadSnippet('cs_stack')">
+                                <div class="w-2 h-2 rounded-full bg-orange-500 mr-3"></div> Stack Implementation
+                            </li>
+                            <li class="flex items-center text-xs text-slate-300 hover:text-white cursor-pointer transition-colors p-2 rounded-xl hover:bg-white/5 border border-transparent hover:border-white/10" onclick="loadSnippet('cs_file')">
+                                <div class="w-2 h-2 rounded-full bg-yellow-400 mr-3"></div> Text File Handling
+                            </li>
+                            <li class="flex items-center text-xs text-slate-300 hover:text-white cursor-pointer transition-colors p-2 rounded-xl hover:bg-white/5 border border-transparent hover:border-white/10" onclick="loadSnippet('cs_sql')">
+                                <div class="w-2 h-2 rounded-full bg-green-400 mr-3"></div> Python-SQL (Simulation)
+                            </li>
+                        </ul>
+
+                        <div class="mt-auto pt-6 border-t border-white/10">
+                            <p class="text-[10px] text-slate-500 uppercase tracking-widest font-bold mb-2">Environment Status</p>
+                            <div class="flex items-center gap-2">
+                                <div id="env-status-dot" class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></div>
+                                <span id="env-status-text" class="text-xs text-amber-500 font-mono">Initializing Pyodide...</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="lg:w-1/2 glass-panel rounded-3xl flex flex-col border border-white/10 shadow-2xl relative overflow-hidden group">
+                        <div class="bg-dark-bg/80 border-b border-white/5 px-4 py-3 flex items-center justify-between z-10">
+                            <div class="flex items-center gap-3">
+                                <div class="flex items-center gap-1.5"><div class="w-3 h-3 rounded-full bg-red-500/80"></div><div class="w-3 h-3 rounded-full bg-yellow-500/80"></div><div class="w-3 h-3 rounded-full bg-green-500/80"></div></div>
+                                <span class="text-xs font-mono text-slate-400 ml-2" id="snippet-title">workspace.py</span>
+                            </div>
+                            <button id="run-code-btn" class="bg-neon-green/20 hover:bg-neon-green/30 text-neon-green border border-neon-green/50 px-4 py-1.5 rounded-lg text-xs font-bold transition-colors flex items-center gap-2" onclick="runLiveCode()">
+                                <i class="fa-solid fa-play"></i> Run Code
+                            </button>
+                        </div>
+                        <div class="flex-1 relative bg-[#1a1b26]" id="editor-container"></div>
+                    </div>
+                    <div class="lg:w-1/4 glass-panel rounded-3xl flex flex-col border border-white/5 overflow-hidden shadow-inner bg-[#0a0a0f]">
+                        <div class="bg-dark-bg/80 border-b border-white/5 px-4 py-3 flex items-center">
+                            <i class="fa-solid fa-terminal text-slate-400 mr-2"></i>
+                            <span class="text-xs font-mono text-slate-400">Execution Console</span>
+                        </div>
+                        <div class="flex-1 p-4 overflow-y-auto no-scrollbar relative" id="output-terminal-container">
+                            <pre id="output-terminal" class="font-mono text-xs text-slate-300 whitespace-pre-wrap word-break-all">Awaiting execution...</pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PROJECTS TAB -->
+            <div id="tab-projects" class="tab-content hidden animate-fade-in h-full flex flex-col pb-10">
+                <header class="mb-6">
+                    <h2 class="text-3xl font-bold mb-2">Capstone <span class="neon-text-gradient">Projects</span></h2>
+                    <p class="text-slate-400">Apply your knowledge. Discover CS & AI projects aligned with practical needs and UN SDGs.</p>
+                </header>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="projects-grid"></div>
+            </div>
+
+            <!-- TUTOR TAB -->
+            <div id="tab-tutor" class="tab-content hidden animate-fade-in h-[calc(100vh-80px)] lg:h-full flex flex-col pb-10">
+                <div class="glass-panel rounded-3xl flex-1 flex flex-col border border-neon-pink/30 overflow-hidden shadow-[0_0_30px_rgba(255,0,127,0.1)]">
+                    <div class="bg-dark-bg/60 backdrop-blur-md border-b border-white/5 p-4 flex items-center justify-between z-10">
+                        <div class="flex items-center gap-3">
+                            <div class="relative">
+                                <div class="w-12 h-12 rounded-full bg-gradient-to-br from-neon-pink to-neon-purple p-[2px]">
+                                    <div class="w-full h-full bg-dark-surface rounded-full flex items-center justify-center">
+                                        <i class="fa-solid fa-brain text-neon-pink text-xl"></i>
+                                    </div>
+                                </div>
+                                <div class="absolute bottom-0 right-0 w-3 h-3 bg-neon-green rounded-full border-2 border-dark-surface"></div>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-white text-lg leading-tight">Quantum AI Tutor</h3>
+                                <p class="text-xs text-neon-green font-medium tracking-wide">Online • Ready to assist</p>
+                            </div>
+                        </div>
+                        <button onclick="clearChat()" class="w-10 h-10 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition-colors flex items-center justify-center" title="Reset Chat">
+                            <i class="fa-solid fa-rotate-right"></i>
+                        </button>
+                    </div>
+                    <div id="chat-history" class="flex-1 overflow-y-auto p-4 lg:p-6 space-y-6 no-scrollbar bg-gradient-to-b from-transparent to-dark-bg/40">
+                        <div class="flex justify-start w-full">
+                            <div class="max-w-[85%] lg:max-w-[75%]">
+                                <p class="text-xs text-slate-500 mb-1 ml-2 font-medium"><i class="fa-solid fa-robot mr-1"></i> Quantum AI</p>
+                                <div class="glass-panel p-4 rounded-2xl rounded-tl-sm border border-neon-pink/20 text-sm chat-markdown shadow-lg">
+                                    <p>Hello! I'm your Quantum AI Tutor powered by Gemini.</p>
+                                    <p>I can help you understand complex topics, quiz you on chapters, or analyze images of your homework problems.</p>
+                                    <p>What are we studying today?</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-4 bg-dark-surface border-t border-white/5">
+                        <div class="max-w-4xl mx-auto relative flex flex-col gap-2">
+                            <!-- Image Preview Container -->
+                            <div id="image-preview-container" class="hidden flex gap-2 overflow-x-auto p-2"></div>
+                            
+                            <div class="relative flex items-end bg-dark-bg border border-white/10 rounded-2xl focus-within:border-neon-pink/50 focus-within:shadow-[0_0_15px_rgba(255,0,127,0.2)] transition-all p-1">
+                                <!-- Image Upload Button -->
+                                <label for="chat-image-upload" class="w-10 h-10 mb-1 ml-1 rounded-xl text-slate-400 hover:text-neon-pink hover:bg-white/5 flex items-center justify-center cursor-pointer transition-colors shrink-0" title="Upload an image of a problem">
+                                    <i class="fa-solid fa-image"></i>
+                                    <input type="file" id="chat-image-upload" accept="image/*" class="hidden" onchange="handleChatImageUpload(event)">
+                                </label>
+                                
+                                <textarea id="chat-input" rows="1" placeholder="Ask a question, upload a problem, or request a quiz..." class="w-full bg-transparent border-none focus:outline-none resize-none py-3 px-4 text-sm text-white max-h-32 min-h-[48px]" oninput="this.style.height = 'auto'; this.style.height = this.scrollHeight + 'px';" onkeydown="if(event.key === 'Enter' && !event.shiftKey){ event.preventDefault(); sendChatMessage(); }"></textarea>
+                                <button id="send-chat-btn" onclick="sendChatMessage()" class="w-10 h-10 mb-1 mr-1 rounded-xl bg-neon-pink text-white flex items-center justify-center flex-shrink-0 hover:bg-pink-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                                    <i class="fa-solid fa-paper-plane"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECRET ADMIN TAB -->
+            <div id="tab-admin" class="tab-content hidden animate-fade-in h-full flex flex-col pb-10">
+                <header class="mb-6 border-b border-white/5 pb-6">
+                    <h2 class="text-3xl font-bold mb-2">Director's <span class="text-amber-500">Command Center</span></h2>
+                    <p class="text-slate-400">Exclusive analytics access for <span class="text-amber-400 font-mono text-xs">quantumhub2026@gmail.com</span></p>
+                </header>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div class="glass-panel p-6 rounded-3xl border border-amber-500/30 relative overflow-hidden">
+                        <div class="absolute -right-6 -top-6 w-24 h-24 bg-amber-500/20 rounded-full blur-2xl"></div>
+                        <h3 class="text-slate-400 text-sm font-bold uppercase tracking-wider mb-2">Total Students</h3>
+                        <p class="text-5xl font-black text-amber-500" id="admin-stat-total">0</p>
+                        <p class="text-xs text-emerald-400 mt-2">Genuine registered accounts</p>
+                    </div>
+                </div>
+
+                <div class="flex flex-col lg:flex-row gap-6 flex-1">
+                    <!-- Real Time Student List -->
+                    <div class="lg:w-1/2 glass-panel p-6 rounded-3xl border border-white/5 flex flex-col h-80">
+                        <h3 class="text-xl font-bold text-white mb-4 border-b border-white/10 pb-2"><i class="fa-solid fa-users text-amber-500 mr-2"></i> Registered Students Directory</h3>
+                        <div id="admin-student-list-container" class="flex-1 overflow-y-auto no-scrollbar space-y-2">
+                            <!-- Populated dynamically -->
+                            <p class="text-slate-500 italic">No students registered yet.</p>
+                        </div>
+                    </div>
+
+                    <!-- Report Generator -->
+                    <div class="lg:w-1/2 glass-panel p-8 rounded-3xl border border-white/5 flex flex-col items-center justify-center text-center">
+                        <div class="w-20 h-20 bg-amber-500/10 rounded-full flex items-center justify-center mb-6 border border-amber-500/30">
+                            <i class="fa-solid fa-file-invoice text-3xl text-amber-500"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold text-white mb-2">Generate Official Report</h3>
+                        <p class="text-slate-400 text-sm mb-8">Compile genuine usage statistics and the verified list of student email IDs into an email draft.</p>
+                        <button id="btn-admin-report" onclick="sendAdminReport()" class="px-6 py-4 rounded-xl bg-gradient-to-r from-amber-600 to-orange-500 text-white font-bold hover:shadow-[0_0_20px_rgba(245,158,11,0.4)] transition-all flex items-center gap-2">
+                            <i class="fa-solid fa-envelope-open-text"></i> Open Mail Client with Report
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Custom Knowledge Injection Modal -->
+    <div id="custom-resource-modal" class="fixed inset-0 z-[60] bg-dark-bg/80 backdrop-blur-sm hidden flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
+        <div class="glass-panel w-full max-w-lg rounded-3xl border border-neon-blue/30 shadow-[0_0_30px_rgba(0,240,255,0.15)] flex flex-col overflow-hidden transform scale-95 transition-transform duration-300" id="custom-resource-content">
+            <div class="bg-gradient-to-r from-neon-purple/20 to-neon-blue/20 border-b border-white/10 p-5 flex justify-between items-center">
+                <h3 class="text-xl font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-microchip text-neon-blue"></i> Train AI / Add Source
+                </h3>
+                <button onclick="closeCustomResourceModal()" class="text-slate-400 hover:text-white transition-colors">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+            <div class="p-6 space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Upload File (TXT, MD, CSV)</label>
+                    <div class="flex items-center justify-center w-full">
+                        <label for="cr-file-upload" class="flex flex-col items-center justify-center w-full h-24 border-2 border-slate-600 border-dashed rounded-xl cursor-pointer bg-dark-bg/50 hover:bg-white/5 hover:border-neon-blue transition-all">
+                            <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                                <i class="fa-solid fa-cloud-arrow-up text-2xl text-neon-blue mb-2"></i>
+                                <p class="text-xs text-slate-400"><span class="font-semibold text-white">Click to upload</span> local file</p>
+                            </div>
+                            <input id="cr-file-upload" type="file" class="hidden" accept=".txt,.md,.csv" onchange="handleFileUpload(event)" />
+                        </label>
+                    </div>
+                </div>
+                <div class="text-center text-[10px] text-slate-500 font-bold uppercase tracking-widest relative">
+                    <span class="bg-dark-surface px-2 relative z-10">OR ENTER MANUALLY</span>
+                    <div class="absolute inset-0 flex items-center z-0"><div class="w-full border-t border-white/10"></div></div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Resource Title</label>
+                    <input type="text" id="cr-title" placeholder="e.g., Advanced Quantum Mechanics Notes" class="w-full bg-dark-bg border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-neon-blue transition-colors">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Resource Content / Text to Ingest</label>
+                    <textarea id="cr-content" rows="4" placeholder="Paste your study notes, article text, or syllabus updates here..." class="w-full bg-dark-bg border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-neon-purple transition-colors resize-none"></textarea>
+                </div>
+                <div class="pt-2">
+                    <button onclick="saveCustomResource()" id="btn-save-cr" class="w-full py-3 rounded-xl bg-neon-blue text-dark-bg font-bold hover:bg-cyan-400 hover:shadow-[0_0_15px_rgba(0,240,255,0.5)] transition-all flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-database"></i> Inject into AI Memory
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- YouTube Doubt Resolution Modal -->
+    <div id="doubt-action-modal" class="fixed inset-0 z-[70] bg-dark-bg/90 backdrop-blur-md hidden flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
+        <div class="glass-panel w-full max-w-lg rounded-3xl border border-neon-blue/30 shadow-[0_0_40px_rgba(0,240,255,0.2)] flex flex-col overflow-hidden transform scale-95 transition-transform duration-300" id="doubt-action-content">
+            <div class="p-8 text-center relative overflow-hidden">
+                <div class="absolute -right-10 -top-10 w-32 h-32 bg-neon-blue/20 rounded-full blur-2xl"></div>
+                
+                <div class="w-20 h-20 bg-gradient-to-br from-neon-blue to-neon-purple rounded-full flex items-center justify-center text-white text-3xl mx-auto mb-6 shadow-lg border-4 border-dark-bg">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-white mb-2" id="doubt-topic-title">Topic Title</h3>
+                <p class="text-slate-400 mb-8">Before marking this as complete, did you fully understand the concepts, or do you need some help?</p>
+                
+                <div class="grid grid-cols-1 gap-4 mb-8">
+                    <button onclick="confirmTopicCompletion()" class="w-full py-4 rounded-2xl bg-neon-green/10 text-neon-green font-bold border border-neon-green/30 hover:bg-neon-green hover:text-dark-bg transition-all flex items-center justify-center gap-2 text-lg">
+                        <i class="fa-solid fa-check-double"></i> I Mastered It! (+50 XP)
+                    </button>
+                </div>
+                
+                <div class="relative mb-6">
+                    <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-white/10"></div></div>
+                    <div class="relative flex justify-center text-sm"><span class="px-2 bg-dark-surface text-slate-500 font-bold uppercase tracking-widest">I have doubts</span></div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <a id="yt-link-concept" href="#" target="_blank" onclick="closeDoubtModal()" class="p-3 rounded-xl bg-white/5 border border-white/10 hover:border-red-500/50 hover:bg-red-500/10 transition-colors flex flex-col items-center group">
+                        <i class="fa-brands fa-youtube text-2xl text-red-500 mb-2 group-hover:scale-110 transition-transform"></i>
+                        <span class="text-xs font-bold text-slate-300 group-hover:text-white text-center">Concept Explainers</span>
+                    </a>
+                    <a id="yt-link-oneshot" href="#" target="_blank" onclick="closeDoubtModal()" class="p-3 rounded-xl bg-white/5 border border-white/10 hover:border-red-500/50 hover:bg-red-500/10 transition-colors flex flex-col items-center group">
+                        <i class="fa-solid fa-bolt text-2xl text-yellow-500 mb-2 group-hover:scale-110 transition-transform"></i>
+                        <span class="text-xs font-bold text-slate-300 group-hover:text-white text-center">One-Shot Revision</span>
+                    </a>
+                    <a id="yt-link-questions" href="#" target="_blank" onclick="closeDoubtModal()" class="p-3 rounded-xl bg-white/5 border border-white/10 hover:border-red-500/50 hover:bg-red-500/10 transition-colors flex flex-col items-center group">
+                        <i class="fa-solid fa-clipboard-list text-2xl text-blue-400 mb-2 group-hover:scale-110 transition-transform"></i>
+                        <span class="text-xs font-bold text-slate-300 group-hover:text-white text-center">Important Questions</span>
+                    </a>
+                </div>
+            </div>
+            <div class="bg-dark-bg p-4 text-center border-t border-white/5">
+                <button onclick="closeDoubtModal()" class="text-sm text-slate-500 hover:text-white transition-colors">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Project Blueprint Modal -->
+    <div id="project-blueprint-modal" class="fixed inset-0 z-[80] bg-dark-bg/90 backdrop-blur-md hidden flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
+        <div class="glass-panel w-full max-w-2xl rounded-3xl border border-yellow-400/30 shadow-[0_0_40px_rgba(250,204,21,0.15)] flex flex-col overflow-hidden transform scale-95 transition-transform duration-300" id="project-blueprint-content">
+            <div class="bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border-b border-white/10 p-5 flex justify-between items-center z-10 relative">
+                <h3 class="text-xl font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-lightbulb text-yellow-400"></i> Project Blueprint
+                </h3>
+                <button onclick="closeBlueprint()" class="text-slate-400 hover:text-white transition-colors">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+            <div class="p-6 md:p-8 overflow-y-auto max-h-[70vh] no-scrollbar text-slate-300 relative">
+                <div class="absolute -left-10 -top-10 w-40 h-40 bg-yellow-400/10 rounded-full blur-3xl pointer-events-none"></div>
+                
+                <h2 id="bp-title" class="text-2xl font-bold text-white mb-4">Project Title</h2>
+                
+                <h4 class="text-sm uppercase font-bold text-yellow-400 tracking-wider mb-2">1. Objective</h4>
+                <p id="bp-desc" class="mb-6 leading-relaxed">Description goes here.</p>
+
+                <h4 class="text-sm uppercase font-bold text-yellow-400 tracking-wider mb-2">2. Tech Stack</h4>
+                <ul class="list-disc ml-5 mb-6 space-y-1 text-sm">
+                    <li>Python (Pandas, Scikit-Learn)</li>
+                    <li>Google Dialogflow / Teachable Machine</li>
+                    <li>Frontend HTML/CSS/JS (Optional)</li>
+                </ul>
+
+                <h4 class="text-sm uppercase font-bold text-yellow-400 tracking-wider mb-2">3. Step-by-Step Implementation</h4>
+                <div class="space-y-4 text-sm bg-dark-bg/50 p-4 rounded-xl border border-white/5">
+                    <p><strong class="text-white">Phase 1: Data Collection:</strong> Gather public datasets related to the UN SDG goal you are tackling (e.g., Kaggle).</p>
+                    <p><strong class="text-white">Phase 2: Model Training:</strong> Use the Live Python Lab to clean data and train a basic model (Classification or Regression).</p>
+                    <p><strong class="text-white">Phase 3: Prototype:</strong> Integrate the model into a simple script or chatbot framework.</p>
+                    <p><strong class="text-white">Phase 4: Testing & Pitch:</strong> Test with peers and create a 3-minute video presentation explaining the societal impact.</p>
+                </div>
+            </div>
+            <div class="bg-dark-bg p-4 text-center border-t border-white/5 relative z-10">
+                <button onclick="startProjectLab()" class="w-full md:w-auto px-8 py-3 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold transition-all">Understood, let's work on it!</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- DATA STRUCTURES ---
+        const TRACK_SYLLABI = {
+            "CBSE_12": {
+                "Physics (NCERT Vol 1 & 2)": { color: "neon-blue", icon: "fa-bolt", progress: 0, topics: [{id:"p1",title:"Electric Charges and Fields",completed:false},{id:"p2",title:"Electrostatic Potential and Capacitance",completed:false},{id:"p3",title:"Current Electricity",completed:false},{id:"p4",title:"Moving Charges and Magnetism",completed:false},{id:"p5",title:"Magnetism and Matter",completed:false},{id:"p6",title:"Electromagnetic Induction",completed:false},{id:"p7",title:"Alternating Current",completed:false},{id:"p8",title:"Electromagnetic Waves",completed:false},{id:"p9",title:"Ray Optics and Optical Instruments",completed:false},{id:"p10",title:"Wave Optics",completed:false},{id:"p11",title:"Dual Nature of Radiation and Matter",completed:false},{id:"p12",title:"Atoms & Nuclei",completed:false},{id:"p13",title:"Semiconductor Electronics",completed:false}] },
+                "Maths (NCERT Part 1 & 2)": { color: "neon-purple", icon: "fa-infinity", progress: 0, topics: [{id:"m1",title:"Relations and Functions",completed:false},{id:"m2",title:"Inverse Trigonometric Functions",completed:false},{id:"m3",title:"Matrices & Determinants",completed:false},{id:"m4",title:"Continuity and Differentiability",completed:false},{id:"m5",title:"Applications of Derivatives",completed:false},{id:"m6",title:"Integrals",completed:false},{id:"m7",title:"Applications of the Integrals",completed:false},{id:"m8",title:"Differential Equations",completed:false},{id:"m9",title:"Vector Algebra",completed:false},{id:"m10",title:"Three Dimensional Geometry",completed:false},{id:"m11",title:"Linear Programming",completed:false},{id:"m12",title:"Probability",completed:false}] },
+                "Chemistry (NCERT Part 1 & 2)": { color: "neon-green", icon: "fa-flask", progress: 0, topics: [{id:"c1",title:"Solutions",completed:false},{id:"c2",title:"Electrochemistry",completed:false},{id:"c3",title:"Chemical Kinetics",completed:false},{id:"c4",title:"The d-and f-Block Elements",completed:false},{id:"c5",title:"Coordination Compounds",completed:false},{id:"c6",title:"Haloalkanes and Haloarenes",completed:false},{id:"c7",title:"Alcohols, Phenols and Ethers",completed:false},{id:"c8",title:"Aldehydes, Ketones and Carboxylic Acids",completed:false},{id:"c9",title:"Amines",completed:false},{id:"c10",title:"Biomolecules",completed:false}] },
+                "Computer Science (Class 12)": { color: "orange-500", icon: "fa-laptop-code", progress: 0, topics: [{id:"cs12_1",title:"Python Revision Tour",completed:false},{id:"cs12_2",title:"Functions in Python",completed:false},{id:"cs12_3",title:"Data File Handling (Text/Binary/CSV)",completed:false},{id:"cs12_4",title:"Data Structures (Stack)",completed:false},{id:"cs12_5",title:"Computer Networks",completed:false},{id:"cs12_6",title:"Database Concepts & SQL",completed:false},{id:"cs12_7",title:"Interface Python with SQL",completed:false}] },
+                "Biology (NCERT 12)": { color: "green-400", icon: "fa-dna", progress: 0, topics: [{id:"b12_1",title:"Reproduction in Organisms",completed:false},{id:"b12_2",title:"Sexual Reproduction in Flowering Plants",completed:false},{id:"b12_3",title:"Human Reproduction & Reproductive Health",completed:false},{id:"b12_4",title:"Principles of Inheritance and Variation",completed:false},{id:"b12_5",title:"Molecular Basis of Inheritance",completed:false},{id:"b12_6",title:"Evolution",completed:false},{id:"b12_7",title:"Human Health and Disease",completed:false},{id:"b12_8",title:"Microbes in Human Welfare",completed:false},{id:"b12_9",title:"Biotechnology: Principles and Processes",completed:false},{id:"b12_10",title:"Organisms and Populations & Ecosystem",completed:false}] },
+                "Artificial Intelligence (Class 12)": { color: "neon-pink", icon: "fa-network-wired", progress: 0, topics: [{id:"a1",title:"Python Programming II",completed:false},{id:"a2",title:"Data Science Methodology",completed:false},{id:"a3",title:"Making Machines See (Computer Vision)",completed:false},{id:"a4",title:"AI with Orange Data Mining",completed:false},{id:"a5",title:"Intro to Big Data Analytics",completed:false},{id:"a6",title:"Understanding Neural Networks",completed:false},{id:"a7",title:"Generative AI",completed:false},{id:"a8",title:"Data Storytelling",completed:false}] },
+                "English Core (NCERT 12)": { color: "amber-500", icon: "fa-pen-nib", progress: 0, topics: [{id:"e12_1",title:"Flamingo: The Last Lesson & Lost Spring",completed:false},{id:"e12_2",title:"Flamingo: Deep Water & The Rattrap",completed:false},{id:"e12_3",title:"Flamingo: Indigo, Poets and Pancakes",completed:false},{id:"e12_4",title:"Flamingo: The Interview & Going Places",completed:false},{id:"e12_5",title:"Flamingo Poetry (My Mother at 66, Keeping Quiet, etc.)",completed:false},{id:"e12_6",title:"Vistas: The Third Level & The Tiger King",completed:false},{id:"e12_7",title:"Vistas: Journey to the end of the Earth & The Enemy",completed:false},{id:"e12_8",title:"Vistas: On the Face of It & Memories of Childhood",completed:false},{id:"e12_9",title:"Advanced Writing Skills",completed:false}] }
+            },
+            "CBSE_11": {
+                "Physics (NCERT 11)": { color: "neon-blue", icon: "fa-bolt", progress: 0, topics: [{id:"p11_1",title:"Units and Measurements",completed:false},{id:"p11_2",title:"Motion in a Straight Line & Plane",completed:false},{id:"p11_3",title:"Laws of Motion",completed:false},{id:"p11_4",title:"Work, Energy and Power",completed:false},{id:"p11_5",title:"System of Particles and Rotational Motion",completed:false},{id:"p11_6",title:"Gravitation",completed:false},{id:"p11_7",title:"Mechanical Properties of Solids & Fluids",completed:false},{id:"p11_8",title:"Thermodynamics",completed:false}] },
+                "Maths (NCERT 11)": { color: "neon-purple", icon: "fa-infinity", progress: 0, topics: [{id:"m11_1",title:"Sets and Relations",completed:false},{id:"m11_2",title:"Trigonometric Functions",completed:false},{id:"m11_3",title:"Complex Numbers and Quadratic Equations",completed:false},{id:"m11_4",title:"Permutations and Combinations",completed:false},{id:"m11_5",title:"Binomial Theorem",completed:false},{id:"m11_6",title:"Sequence and Series",completed:false},{id:"m11_7",title:"Limits and Derivatives",completed:false}] },
+                "Chemistry (NCERT 11)": { color: "neon-green", icon: "fa-flask", progress: 0, topics: [{id:"c11_1",title:"Some Basic Concepts of Chemistry",completed:false},{id:"c11_2",title:"Structure of Atom",completed:false},{id:"c11_3",title:"Classification of Elements and Periodicity",completed:false},{id:"c11_4",title:"Chemical Bonding and Molecular Structure",completed:false},{id:"c11_5",title:"Thermodynamics",completed:false},{id:"c11_6",title:"Equilibrium",completed:false},{id:"c11_7",title:"Redox Reactions",completed:false},{id:"c11_8",title:"Organic Chemistry - Basic Principles",completed:false}] },
+                "Computer Science (Class 11)": { color: "orange-500", icon: "fa-laptop-code", progress: 0, topics: [{id:"cs11_1",title:"Computer Systems & Organization",completed:false},{id:"cs11_2",title:"Python Programming Fundamentals",completed:false},{id:"cs11_3",title:"Data Handling in Python",completed:false},{id:"cs11_4",title:"Flow of Control (if, loops)",completed:false},{id:"cs11_5",title:"String Manipulation",completed:false},{id:"cs11_6",title:"Lists, Tuples and Dictionaries",completed:false},{id:"cs11_7",title:"Cyber Safety & Ethics",completed:false}] },
+                "Biology (NCERT 11)": { color: "green-400", icon: "fa-dna", progress: 0, topics: [{id:"b11_1",title:"The Living World & Biological Classification",completed:false},{id:"b11_2",title:"Plant Kingdom & Animal Kingdom",completed:false},{id:"b11_3",title:"Morphology & Anatomy of Flowering Plants",completed:false},{id:"b11_4",title:"Cell: The Unit of Life & Cell Cycle",completed:false},{id:"b11_5",title:"Biomolecules",completed:false},{id:"b11_6",title:"Photosynthesis in Higher Plants",completed:false},{id:"b11_7",title:"Respiration in Plants & Plant Growth",completed:false},{id:"b11_8",title:"Breathing and Exchange of Gases",completed:false},{id:"b11_9",title:"Body Fluids and Circulation",completed:false},{id:"b11_10",title:"Excretory Products and their Elimination",completed:false}] },
+                "Artificial Intelligence (Class 11)": { color: "neon-pink", icon: "fa-robot", progress: 0, topics: [{id:"ai11_1",title:"Introduction: AI for Everyone",completed:false},{id:"ai11_2",title:"Unlocking your Future in AI",completed:false},{id:"ai11_3",title:"Python Programming I",completed:false},{id:"ai11_4",title:"Intro to Capstone Project",completed:false},{id:"ai11_5",title:"Data Literacy & Analysis",completed:false},{id:"ai11_6",title:"Machine Learning Algorithms",completed:false},{id:"ai11_7",title:"Leveraging Linguistics and CS (NLP)",completed:false},{id:"ai11_8",title:"AI Ethics and Values",completed:false}] },
+                "English Core (NCERT 11)": { color: "amber-500", icon: "fa-pen-nib", progress: 0, topics: [{id:"e11_1",title:"Hornbill: The Portrait of a Lady & A Photograph",completed:false},{id:"e11_2",title:"Hornbill: We're Not Afraid to Die... & Discovering Tut",completed:false},{id:"e11_3",title:"Hornbill: The Adventure & Silk Road",completed:false},{id:"e11_4",title:"Hornbill Poetry",completed:false},{id:"e11_5",title:"Snapshots: The Summer of the Beautiful White Horse",completed:false},{id:"e11_6",title:"Snapshots: The Address & Mother's Day",completed:false},{id:"e11_7",title:"Grammar & Creative Writing Skills",completed:false}] }
+            },
+            "JEE_MAIN": {
+                "Physics (JEE Main)": { color: "neon-blue", icon: "fa-bolt", progress: 0, topics: [{id:"jm_p1", title:"Mechanics & Kinematics", completed:false}, {id:"jm_p2", title:"Electromagnetism", completed:false}, {id:"jm_p3", title:"Optics & Modern Physics", completed:false}, {id:"jm_p4", title:"Thermodynamics", completed:false}] },
+                "Maths (JEE Main)": { color: "neon-purple", icon: "fa-infinity", progress: 0, topics: [{id:"jm_m1", title:"Calculus", completed:false}, {id:"jm_m2", title:"Coordinate Geometry", completed:false}, {id:"jm_m3", title:"Algebra (Complex, Quadratic, Sequences)", completed:false}, {id:"jm_m4", title:"Vector 3D & Matrices", completed:false}] },
+                "Chemistry (JEE Main)": { color: "neon-green", icon: "fa-flask", progress: 0, topics: [{id:"jm_c1", title:"Physical Chemistry (Mole, Thermo, Kinetics)", completed:false}, {id:"jm_c2", title:"Organic Chemistry (GOC, Hydrocarbons, Mechanisms)", completed:false}, {id:"jm_c3", title:"Inorganic Chemistry (Bonding, p-d-f blocks, Coord)", completed:false}] }
+            },
+            "JEE_ADV": {
+                "Physics (Advanced)": { color: "neon-blue", icon: "fa-bolt", progress: 0, topics: [{id:"ja_p1", title:"Advanced Mechanics (Rotational, SHM)", completed:false}, {id:"ja_p2", title:"Advanced Electrodynamics", completed:false}, {id:"ja_p3", title:"Thermal Physics", completed:false}, {id:"ja_p4", title:"Advanced Optics", completed:false}] },
+                "Maths (Advanced)": { color: "neon-purple", icon: "fa-infinity", progress: 0, topics: [{id:"ja_m1", title:"Advanced Calculus (Definite Int, Area, Diff Eq)", completed:false}, {id:"ja_m2", title:"Complex Numbers & Advanced Algebra", completed:false}, {id:"ja_m3", title:"Advanced Coordinate Geometry", completed:false}] },
+                "Chemistry (Advanced)": { color: "neon-green", icon: "fa-flask", progress: 0, topics: [{id:"ja_c1", title:"Advanced Physical Chem", completed:false}, {id:"ja_c2", title:"Stereochemistry & Reaction Mechanisms", completed:false}, {id:"ja_c3", title:"Qualitative Analysis", completed:false}] }
+            },
+            "SAT": {
+                "SAT Reading & Writing": { color: "orange-500", icon: "fa-book-open", progress: 0, topics: [{id:"sat_rw1", title:"Information and Ideas (Command of Evidence)", completed:false}, {id:"sat_rw2", title:"Craft and Structure (Words in Context)", completed:false}, {id:"sat_rw3", title:"Expression of Ideas (Transitions)", completed:false}, {id:"sat_rw4", title:"Standard English Conventions", completed:false}] },
+                "SAT Math": { color: "neon-purple", icon: "fa-calculator", progress: 0, topics: [{id:"sat_m1", title:"Heart of Algebra (Linear Equations)", completed:false}, {id:"sat_m2", title:"Problem Solving and Data Analysis", completed:false}, {id:"sat_m3", title:"Passport to Advanced Math (Quadratics, Polynomials)", completed:false}, {id:"sat_m4", title:"Geometry & Trigonometry", completed:false}] }
+            },
+            "AP": {
+                "AP Calculus AB/BC": { color: "neon-purple", icon: "fa-chart-area", progress: 0, topics: [{id:"ap_c1", title:"Limits and Continuity", completed:false}, {id:"ap_c2", title:"Differentiation (Rules & Applications)", completed:false}, {id:"ap_c3", title:"Integration & Accumulation of Change", completed:false}, {id:"ap_c4", title:"Differential Equations", completed:false}, {id:"ap_c5", title:"Infinite Sequences and Series (BC Only)", completed:false}] },
+                "AP Physics C: Mechanics": { color: "neon-blue", icon: "fa-atom", progress: 0, topics: [{id:"ap_p1", title:"Kinematics", completed:false}, {id:"ap_p2", title:"Newton's Laws of Motion", completed:false}, {id:"ap_p3", title:"Work, Energy, and Power", completed:false}, {id:"ap_p4", title:"Rotation & Oscillations", completed:false}] }
+            }
+        };
+
+        const ARCHIVE_PAPERS = {
+            "CBSE_12": [
+                { year: '2026', title: 'Grade 12 Official Sample Paper', type: 'mock', color: 'neon-purple' },
+                { year: '2025', title: 'Grade 12 Board Paper (Set 1-3)', type: 'board', color: 'neon-blue' },
+                { year: '2024', title: 'Grade 12 Board Paper & Marking Scheme', type: 'board', color: 'neon-blue' }
+            ],
+            "CBSE_11": [
+                { year: '2026', title: 'Grade 11 Annual Practice Paper', type: 'mock', color: 'neon-green' }
+            ],
+            "JEE_MAIN": [
+                { year: '2025', title: 'JEE Main Session 1 & 2 Papers', type: 'board', color: 'neon-blue' },
+                { year: '2024', title: 'JEE Main Official PYQs', type: 'board', color: 'slate-500' }
+            ],
+            "JEE_ADV": [
+                { year: '2025', title: 'JEE Advanced Paper 1 & 2', type: 'board', color: 'neon-blue' }
+            ],
+            "SAT": [
+                { year: '2025', title: 'Official Digital SAT Practice Test 1-4', type: 'mock', color: 'orange-500' }
+            ],
+            "AP": [
+                { year: '2025', title: 'AP Calculus BC Free Response', type: 'board', color: 'neon-purple' }
+            ]
+        };
+
+        // Restored official NCERT links
+        const RESOURCE_LIBRARY = {
+            "CBSE_11": [
+                { title: "NCERT Physics (Class 11)", desc: "Official NCERT Textbook Part 1.", url: "https://ncert.nic.in/textbook.php?keph1=0-8", icon: "fa-bolt", color: "neon-blue" },
+                { title: "NCERT Chemistry (Class 11)", desc: "Official NCERT Textbook Part 1.", url: "https://ncert.nic.in/textbook.php?kech1=0-7", icon: "fa-flask", color: "neon-green" },
+                { title: "NCERT Mathematics (Class 11)", desc: "Official NCERT Mathematics Textbook.", url: "https://ncert.nic.in/textbook.php?kemh1=0-16", icon: "fa-infinity", color: "neon-purple" },
+                { title: "NCERT Biology (Class 11)", desc: "Official NCERT Biology Textbook.", url: "https://ncert.nic.in/textbook.php?kebo1=0-22", icon: "fa-dna", color: "green-400" },
+                { title: "NCERT English Core (Class 11)", desc: "Official Textbook: Hornbill.", url: "https://ncert.nic.in/textbook.php?kehb1=0-8", icon: "fa-book", color: "amber-500" },
+                { title: "NCERT Computer Science (Class 11)", desc: "Official Textbook (Code 083).", url: "https://drive.google.com/file/d/1rieH4_oJUZYSTh3rK1hsh1SUd8aBF4oq/view?usp=drive_link", icon: "fa-laptop-code", color: "orange-500" },
+                { title: "AI Student Handbook (Class XI)", desc: "Subject Code: 843. Official handbook covering Data Literacy, Python Programming, and Machine Learning algorithms.", url: "https://drive.google.com/file/d/15uYGB5D6beOmpFLToBmNWqkY_aRwiNMn/view?usp=sharing", icon: "fa-robot", color: "neon-pink" },
+                { title: "AI Projects Cookbook (Class XI & XII)", desc: "Guide for implementing AI Capstone projects addressing UN Sustainable Development Goals (SDGs).", url: "https://drive.google.com/file/d/19oA0dt5bRl74bhHCeMeaqMOdmKxmw5hD/view?usp=sharing", icon: "fa-book-journal-whills", color: "neon-green" }
+            ],
+            "CBSE_12": [
+                { title: "NCERT Physics (Class 12)", desc: "Official NCERT Textbook Part 1.", url: "https://ncert.nic.in/textbook.php?leph1=0-8", icon: "fa-bolt", color: "neon-blue" },
+                { title: "NCERT Chemistry (Class 12)", desc: "Official NCERT Textbook Part 1.", url: "https://ncert.nic.in/textbook.php?lech1=0-9", icon: "fa-flask", color: "neon-green" },
+                { title: "NCERT Mathematics (Class 12)", desc: "Official NCERT Mathematics Part 1.", url: "https://ncert.nic.in/textbook.php?lemh1=0-6", icon: "fa-infinity", color: "neon-purple" },
+                { title: "NCERT Biology (Class 12)", desc: "Official NCERT Biology Textbook.", url: "https://ncert.nic.in/textbook.php?lebo1=0-16", icon: "fa-dna", color: "green-400" },
+                { title: "NCERT English Core (Class 12)", desc: "Official Textbook: Flamingo.", url: "https://ncert.nic.in/textbook.php?lefl1=0-8", icon: "fa-book-open", color: "amber-500" },
+                { title: "NCERT Computer Science (Class 12)", desc: "Official Textbook (Code 083). Exception Handling, File Handling, Stack, Queue, Sorting, Searching, and SQL.", url: "https://drive.google.com/file/d/1KPp2_HQPt6zT5BPXDFYEs2sQmV5eW8ex/view?usp=drive_link", icon: "fa-laptop-code", color: "orange-500" },
+                { title: "AI Student Handbook (Class XII)", desc: "Subject Code: 843. Official handbook covering Data Science Methodologies, Computer Vision, NLP, and Generative AI.", url: "https://drive.google.com/file/d/1aIuvQC-fbh7E7mhNa5SafwAeLmPii_76/view?usp=sharing", icon: "fa-microchip", color: "neon-blue" },
+                { title: "AI Projects Cookbook (Class XI & XII)", desc: "Guide for implementing AI Capstone projects addressing UN Sustainable Development Goals (SDGs).", url: "https://drive.google.com/file/d/19oA0dt5bRl74bhHCeMeaqMOdmKxmw5hD/view?usp=sharing", icon: "fa-book-journal-whills", color: "neon-green" }
+            ],
+            "SAT": [
+                { title: "Official SAT Study Guide", desc: "Comprehensive official strategies, grammar rules, and reading practice for the Digital SAT.", url: "SAT_Official_Study_Guide.pdf", icon: "fa-book-open", color: "orange-500" },
+                { title: "SAT Math Mastery", desc: "Comprehensive math review spanning Algebra to advanced trigonometry.", url: "SAT_Math_Mastery_Ebook.pdf", icon: "fa-calculator", color: "neon-purple" },
+                { title: "Khan Academy Official SAT Practice", desc: "Free, personalized SAT practice created in partnership with the College Board.", url: "https://www.khanacademy.org/sat", icon: "fa-leaf", color: "neon-green" },
+                { title: "College Board Bluebook™", desc: "Download the official testing app for Digital SAT practice tests.", url: "https://bluebook.collegeboard.org/", icon: "fa-download", color: "neon-blue" }
+            ],
+            "AP": [
+                { title: "AP Calculus AB/BC Master Guide", desc: "Complete AP Calc prep book with theorems, derivations, and practice questions.", url: "AP_Calculus_Prep.pdf", icon: "fa-chart-area", color: "neon-purple" },
+                { title: "AP Physics C Mechanics & E&M", desc: "In-depth physics prep covering kinematics, dynamics, rotation, and electromagnetism.", url: "AP_Physics_C_Prep.pdf", icon: "fa-atom", color: "neon-blue" },
+                { title: "AP Computer Science A", desc: "Comprehensive guide to Java programming and Object-Oriented design principles.", url: "AP_Computer_Science_A.pdf", icon: "fa-laptop-code", color: "orange-500" },
+                { title: "Khan Academy AP Courses", desc: "Comprehensive video lessons and practice for AP Calculus, Physics, Bio, and more.", url: "https://www.khanacademy.org/", icon: "fa-leaf", color: "neon-green" }
+            ],
+            "JEE": [
+                { title: "JEE Main Physics Comprehensive", desc: "Complete physics notes, derivations, and formulas for competitive exams.", url: "JEE_Main_Physics.pdf", icon: "fa-book", color: "neon-blue" },
+                { title: "JEE Advanced Mathematics", desc: "Advanced problem-solving ebook focused on Calculus, Algebra, and Coordinate Geometry.", url: "JEE_Adv_Maths.pdf", icon: "fa-infinity", color: "neon-purple" },
+                { title: "Chemistry Master Guide", desc: "Detailed breakdown of Organic, Physical, and Inorganic chemistry mechanisms.", url: "JEE_Chemistry.pdf", icon: "fa-flask", color: "neon-green" },
+                { title: "Concepts of Physics by H.C. Verma", desc: "The standard foundational text for JEE Physics preparation. (Vol 1 & 2)", url: "HC_Verma_Vol1_2.pdf", icon: "fa-book-open", color: "neon-blue" },
+                { title: "Problems in General Physics (I.E. Irodov)", desc: "Advanced physics problems for JEE Advanced rank boosting.", url: "Irodov_Physics.pdf", icon: "fa-brain", color: "neon-purple" }
+            ]
+        };
+
+        const SNIPPETS = {
+            'blank': { title: 'blank_session.py', code: `# Blank Python Sandbox\n# Matplotlib, Pandas, and Scikit-Learn are pre-installed and 100% ready!\n\nimport numpy as np\nimport pandas as pd\nimport matplotlib.pyplot as plt\n\nprint("Initializing Cloud Environment...")\nprint("Rendering visual plot...")\n\n# Generate a sample sine wave plot\nx = np.linspace(0, 10, 100)\ny = np.sin(x)\n\nplt.figure(figsize=(6, 3))\nplt.plot(x, y, color='cyan', linewidth=2)\nplt.title('Environment Test: Matplotlib Status [OK]', color='white')\nplt.tick_params(colors='white')\nplt.show()\n` },
+            'knn': { title: 'knn_iris.py', code: `# KNN Classification\nfrom sklearn.datasets import load_iris\nfrom sklearn.model_selection import train_test_split\nfrom sklearn.neighbors import KNeighborsClassifier\nfrom sklearn import metrics\n\niris = load_iris()\nX_train, X_test, y_train, y_test = train_test_split(iris.data, iris.target, test_size=0.2, random_state=1)\n\nknn = KNeighborsClassifier(n_neighbors=3)\nknn.fit(X_train, y_train)\ny_pred = knn.predict(X_test)\nprint(f"Model Accuracy: {metrics.accuracy_score(y_test, y_pred) * 100:.2f}%")` },
+            'regression': { title: 'linear_regression.py', code: `import numpy as np\nimport matplotlib.pyplot as plt\nfrom sklearn.linear_model import LinearRegression\n\nX = np.array([1, 2, 3, 4, 5, 6, 7]).reshape(-1, 1)\ny = np.array([45, 55, 65, 70, 80, 85, 95])\n\nmodel = LinearRegression().fit(X, y)\ny_pred = model.predict(X)\n\nplt.figure(figsize=(6,4))\nplt.scatter(X, y, color='cyan', label='Actual Data')\nplt.plot(X, y_pred, color='magenta', label='Regression Line')\nplt.title('Study Hours vs. Grade', color='white')\nplt.tick_params(colors='white')\nplt.legend()\nplt.show()` },
+            'cs_stack': { title: 'stack_operations.py', code: `# CBSE CS Class 11/12: Stack Implementation using List\n\ndef push(stack, item):\n    stack.append(item)\n    print(f"Pushed: {item}")\n\ndef pop(stack):\n    if not stack:\n        return "Stack is empty (Underflow)"\n    return stack.pop()\n\nmy_stack = []\npush(my_stack, "Book 1")\npush(my_stack, "Book 2")\npush(my_stack, "Book 3")\nprint(f"Current Stack: {my_stack}")\nprint(f"Popped item: {pop(my_stack)}")\nprint(f"Stack after pop: {my_stack}")` },
+            'cs_file': { title: 'text_file_handling.py', code: `# CBSE CS Class 11/12: Text File Handling\n# Note: In Pyodide browser env, files are virtual.\n\n# Writing to a file\nwith open('student_data.txt', 'w') as file:\n    file.write("RollNo, Name, Marks\\n")\n    file.write("1, Alice, 95\\n")\n    file.write("2, Bob, 88\\n")\nprint("Data written successfully.\\n")\n\n# Reading from a file\nprint("Reading Data:")\nwith open('student_data.txt', 'r') as file:\n    content = file.read()\n    print(content)` },
+            'cs_sql': { title: 'sql_python_simulation.py', code: `# CBSE CS Class 11/12: Python-SQL Interface (Simulation)\n# Uses sqlite3 which is available in Python standard library\nimport sqlite3\n\n# Create an in-memory database\nconn = sqlite3.connect(':memory:')\ncursor = conn.cursor()\n\n# Create Table\ncursor.execute('''CREATE TABLE Students (RollNo INT, Name TEXT, Grade TEXT)''')\n\n# Insert Data\ncursor.execute("INSERT INTO Students VALUES (1, 'Ravi', 'A')")\ncursor.execute("INSERT INTO Students VALUES (2, 'Priya', 'A+')")\nconn.commit()\n\n# Fetch Data\ncursor.execute("SELECT * FROM Students")\nrows = cursor.fetchall()\n\nprint("SQL Query Results:")\nfor row in rows:\n    print(row)` }
+        };
+
+        // Current Local State (will sync with Firestore)
+        let userData = {
+            xp: 0, level: 1, streak: 1, track: 'CBSE_12', lastActive: Date.now(),
+            syllabus: JSON.parse(JSON.stringify(TRACK_SYLLABI['CBSE_12'])),
+            performance: { testsTaken: 0, totalScore: 0, history: [] },
+            customResources: [], 
+            linkedAccounts: { 
+                khan: { synced: false, mastery: 0, mins: 0 }, 
+                cb: { synced: false, sat: 0, ap: 0 } 
+            },
+            pomodoroHistory: { todayCount: 0, date: new Date().toDateString(), subjectsStudied: [] },
+            communityPosts: [
+                { id: 1, author: "tushar@school.edu", text: "How do you traverse a Stack in Python?", time: "2h ago", replies: [{author: "admin", text: "Use a while loop and pop() until it is empty. Check the Live Lab snippet!"}] },
+                { id: 2, author: "student42@gmail.com", text: "Does anyone have good notes for Electric Charges and Fields?", time: "5h ago", replies: [] }
+            ]
+        };
+
+        let chatHistory = [];
+        let isWaitingForAI = false;
+        let activeTestContext = null;
+        let pyodideReady = false;
+        let pyodideInstance = null;
+        let isSignUpMode = false;
+        let pendingTopicCompletion = null; 
+        
+        let pendingChatImageBase64 = null;
+        let pendingChatImageMimeType = null;
+
+        // --- COLLEGE PROJECT ADMIN TRACKING ---
+        function trackUserRegistration(email) {
+            let allUsers = JSON.parse(localStorage.getItem('quantum_all_users') || '[]');
+            if (!allUsers.find(u => u.email.toLowerCase() === email.toLowerCase())) {
+                allUsers.push({ email: email, date: new Date().toLocaleDateString() });
+                localStorage.setItem('quantum_all_users', JSON.stringify(allUsers));
+            }
+        }
+
+        function loadAdminData() {
+            let allUsers = JSON.parse(localStorage.getItem('quantum_all_users') || '[]');
+            document.getElementById('admin-stat-total').innerText = allUsers.length;
+            const listContainer = document.getElementById('admin-student-list-container');
+            if (allUsers.length === 0) {
+                listContainer.innerHTML = '<p class="text-slate-500 italic">No students registered yet.</p>';
+            } else {
+                listContainer.innerHTML = allUsers.map(u => `
+                    <div class="flex justify-between items-center bg-dark-surface p-3 rounded-xl border border-white/5">
+                        <span class="text-sm font-bold text-white"><i class="fa-solid fa-user-graduate text-slate-500 mr-2"></i> ${u.email}</span>
+                        <span class="text-xs text-emerald-400 font-mono">Joined: ${u.date}</span>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function sendAdminReport() {
+            const btn = document.getElementById('btn-admin-report');
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Compiling Data...';
+            setTimeout(() => {
+                let allUsers = JSON.parse(localStorage.getItem('quantum_all_users') || '[]');
+                let subject = "Quantum Hub - Verified Student Usage Report";
+                let body = "Hello,%0D%0A%0D%0AHere is the genuine tracking report for Quantum Hub as part of the college project administration.%0D%0A%0D%0A";
+                body += `Total Verified Students: ${allUsers.length}%0D%0A`;
+                body += "--------------------------------------------------%0D%0A";
+                body += "REGISTERED STUDENT EMAIL IDs:%0D%0A";
+                allUsers.forEach((u, index) => { body += `${index + 1}. ${u.email} (Registered: ${u.date})%0D%0A`; });
+                body += "--------------------------------------------------%0D%0A%0D%0AEnd of automated report.";
+                window.location.href = `mailto:quantumhub2026@gmail.com?subject=${subject}&body=${body}`;
+                btn.innerHTML = '<i class="fa-solid fa-check"></i> Mail Client Opened';
+                btn.classList.replace('from-amber-600', 'from-green-600');
+                btn.classList.replace('to-orange-500', 'to-emerald-500');
+                showToast("Opening your default mail app...", "success");
+                setTimeout(() => {
+                    btn.innerHTML = '<i class="fa-solid fa-envelope-open-text"></i> Open Mail Client with Report';
+                    btn.classList.replace('from-green-600', 'from-amber-600');
+                    btn.classList.replace('to-emerald-500', 'to-orange-500');
+                }, 4000);
+            }, 800);
+        }
+
+        // --- AUTHENTICATION LOGIC ---
+        function toggleAuthMode() {
+            isSignUpMode = !isSignUpMode;
+            const titleSpan = document.querySelector('#auth-submit-btn span');
+            const toggleBtn = document.getElementById('auth-toggle-btn');
+            const subtitle = document.getElementById('auth-subtitle');
+            if (isSignUpMode) {
+                titleSpan.innerText = 'Create Cloud Account';
+                subtitle.innerText = 'Register to sync progress across all devices';
+                toggleBtn.innerHTML = 'Already have an account? <span class="text-neon-blue font-bold">Sign In</span>';
+            } else {
+                titleSpan.innerText = 'Sign In to Cloud';
+                subtitle.innerText = 'Sign in to access your Cloud AI Lab';
+                toggleBtn.innerHTML = 'Need an account? <span class="text-neon-blue font-bold">Sign Up</span>';
+            }
+        }
+
+        async function handleAuth(e) {
+            e.preventDefault();
+            const email = document.getElementById('auth-email').value;
+            const password = document.getElementById('auth-password').value;
+            const btn = document.getElementById('auth-submit-btn');
+            const originalHtml = btn.innerHTML;
+            
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>Connecting to Cloud...</span>';
+            
+            if (window.isSimulated) {
+                setTimeout(() => {
+                    const overlay = document.getElementById('auth-overlay');
+                    overlay.classList.add('opacity-0');
+                    setTimeout(() => overlay.classList.add('hidden'), 300);
+                    
+                    document.getElementById('nav-user-email').innerText = email.split('@')[0];
+                    window.initDataListener("local-simulated-uid");
+                    showToast(`${isSignUpMode ? 'Account Created' : 'Signed In'} (Local Simulated Mode)`, 'success');
+                    
+                    trackUserRegistration(email);
+
+                    if (email.toLowerCase() === 'quantumhub2026@gmail.com') {
+                        document.getElementById('nav-admin').classList.remove('hidden');
+                        setTimeout(() => { switchTab('admin'); loadAdminData(); }, 400);
+                        showToast("Director Access Granted.", "success");
+                    } else {
+                        document.getElementById('nav-admin').classList.add('hidden');
+                        switchTab('dashboard');
+                    }
+                    btn.disabled = false;
+                    btn.innerHTML = originalHtml;
+                }, 800);
+                return;
+            }
+
+            if (!window.auth) return;
+            try {
+                if (isSignUpMode) { await window.createUserWithEmailAndPassword(window.auth, email, password); } 
+                else { await window.signInWithEmailAndPassword(window.auth, email, password); }
+                
+                trackUserRegistration(email);
+                
+                if (email.toLowerCase() === 'quantumhub2026@gmail.com') {
+                    document.getElementById('nav-admin').classList.remove('hidden');
+                    setTimeout(() => { switchTab('admin'); loadAdminData(); }, 400);
+                } else {
+                    document.getElementById('nav-admin').classList.add('hidden');
+                    switchTab('dashboard');
+                }
+            } catch (error) {
+                console.error("Auth Error:", error);
+                let errMsg = "Authentication failed. Please try again.";
+                if(error.code === 'auth/email-already-in-use') errMsg = "Email is already registered.";
+                if(error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') errMsg = "Invalid email or password.";
+                if(error.code === 'auth/weak-password') errMsg = "Password should be at least 6 characters.";
+                showToast(errMsg, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalHtml;
+            }
+        }
+
+        async function logoutUser() {
+            if (window.isSimulated) { resetUIForLogout(); showToast("Logged out successfully.", "info"); return; }
+            if (window.auth) { try { await window.signOut(window.auth); resetUIForLogout(); } catch (error) { console.error("Logout error", error); } }
+        }
+        
+        function resetUIForLogout() {
+            userData.xp = 0;
+            document.getElementById('dash-xp').innerText = "0";
+            document.getElementById('dash-xp-bar').style.width = "0%";
+            document.getElementById('chat-history').innerHTML = '';
+            switchTab('dashboard');
+            const overlay = document.getElementById('auth-overlay');
+            overlay.classList.remove('hidden');
+            void overlay.offsetWidth; 
+            overlay.classList.remove('opacity-0');
+        }
+
+        // --- FIREBASE SYNC LOGIC ---
+        window.initDataListener = async (userId) => {
+            if (window.isSimulated) {
+                userData.syllabus = JSON.parse(JSON.stringify(TRACK_SYLLABI[userData.track] || TRACK_SYLLABI['CBSE_12']));
+                const selector = document.getElementById('track-selector');
+                if (selector) selector.value = userData.track;
+                checkActivityAndStreak();
+                updateUI();
+                updateAssessmentStats();
+                populatePomodoroSubjects();
+                return;
+            }
+
+            const docRef = window.doc(window.db, 'artifacts', window.appId, 'users', userId, 'profile', 'data');
+            window.onSnapshot(docRef, (docSnap) => {
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    userData.xp = data.xp !== undefined ? data.xp : userData.xp;
+                    userData.level = data.level || userData.level;
+                    userData.streak = data.streak || userData.streak;
+                    userData.track = data.track || userData.track;
+                    userData.lastActive = data.lastActive || userData.lastActive;
+                    if(data.performance) userData.performance = data.performance;
+                    if(data.customResources) userData.customResources = data.customResources;
+                    if(data.linkedAccounts) {
+                        userData.linkedAccounts = data.linkedAccounts;
+                        if (typeof userData.linkedAccounts.khan === 'boolean') userData.linkedAccounts.khan = { synced: userData.linkedAccounts.khan, mastery: 92, mins: 120 };
+                        if (typeof userData.linkedAccounts.cb === 'boolean') userData.linkedAccounts.cb = { synced: userData.linkedAccounts.cb, sat: 1450, ap: 5 };
+                    }
+                    if(data.pomodoroHistory) userData.pomodoroHistory = data.pomodoroHistory;
+                    if(data.communityPosts) userData.communityPosts = data.communityPosts;
+                    
+                    if(data.syllabus) {
+                         const targetSyllabus = TRACK_SYLLABI[userData.track] || TRACK_SYLLABI['CBSE_12'];
+                         Object.keys(targetSyllabus).forEach(subKey => {
+                            if(!data.syllabus[subKey]) { userData.syllabus[subKey] = targetSyllabus[subKey]; } 
+                            else { userData.syllabus[subKey] = data.syllabus[subKey]; }
+                         });
+                    }
+                } else {
+                    userData.syllabus = JSON.parse(JSON.stringify(TRACK_SYLLABI[userData.track] || TRACK_SYLLABI['CBSE_12']));
+                    saveUserData(); 
+                }
+                
+                const selector = document.getElementById('track-selector');
+                if (selector) selector.value = userData.track;
+                const display = document.getElementById('subject-grade-display');
+                if (display) display.innerText = userData.track.replace('_', ' ');
+                
+                checkActivityAndStreak();
+                updateUI();
+                updateAssessmentStats();
+                populatePomodoroSubjects();
+            });
+        };
+
+        async function saveUserData() {
+            if (window.isSimulated) return;
+            if (!window.auth || !window.auth.currentUser) return;
+            try {
+                const docRef = window.doc(window.db, 'artifacts', window.appId, 'users', window.auth.currentUser.uid, 'profile', 'data');
+                await window.setDoc(docRef, userData, { merge: true });
+            } catch (e) {
+                console.error("Cloud Save Error:", e);
+                showToast("Error syncing to cloud.", "error");
+            }
+        }
+
+        // --- PYODIDE LIVE EXECUTION LOGIC ---
+        window.onload = () => {
+            renderArchive();
+            renderLibrary();
+            renderLeaderboard('daily');
+            window.editor = CodeMirror(document.getElementById('editor-container'), {
+                mode: "python", theme: "dracula", lineNumbers: true, indentUnit: 4, matchBrackets: true,
+                value: "# Preparing Python environment..."
+            });
+            initPythonEnv();
+            if (typeof hljs !== 'undefined') hljs.highlightAll(); 
+        };
+
+        window.addEventListener('DOMContentLoaded', () => {
+            setTimerMode(25);
+        });
+
+        async function initPythonEnv() {
+            const statusText = document.getElementById('env-status-text');
+            const statusDot = document.getElementById('env-status-dot');
+            const terminal = document.getElementById('output-terminal');
+            
+            terminal.innerText = "Downloading Python Environment (Pyodide)...\nFetching ML Libraries (scikit-learn, pandas, matplotlib)...\nThis may take up to 30 seconds on the first load...\n\n";
+            
+            try {
+                pyodideInstance = await loadPyodide();
+                terminal.innerText += "Python Core Loaded.\nInstalling dependencies natively...\n";
+                
+                await pyodideInstance.loadPackage(['scikit-learn', 'pandas', 'matplotlib']);
+                
+                await pyodideInstance.runPythonAsync(`
+import sys
+import io
+import base64
+import matplotlib.pyplot as plt
+from js import document
+
+class RedirectStdout:
+    def __init__(self):
+        self.content = ""
+    def write(self, string):
+        self.content += string
+    def flush(self):
+        pass
+
+sys.stdout = RedirectStdout()
+
+def custom_show():
+    buf = io.BytesIO()
+    plt.tight_layout()
+    plt.savefig(buf, format='png', transparent=True, edgecolor='none')
+    buf.seek(0)
+    img_str = base64.b64encode(buf.read()).decode('utf-8')
+    container = document.getElementById('output-terminal-container')
+    img = document.createElement('img')
+    img.src = 'data:image/png;base64,' + img_str
+    img.className = 'matplotlib-plot-img'
+    container.appendChild(img)
+    plt.clf()
+
+plt.show = custom_show
+                `);
+                
+                pyodideReady = true;
+                statusText.innerText = "Python Ready";
+                statusText.classList.replace('text-amber-500', 'text-neon-green');
+                statusDot.classList.replace('bg-amber-500', 'bg-neon-green');
+                statusDot.classList.remove('animate-pulse');
+                
+                terminal.innerText += "\nEnvironment Successfully Initialized!\nSelect a practical from the left and click 'Run Code'.";
+                loadSnippet('blank'); 
+            } catch (err) {
+                statusText.innerText = "Env Error";
+                statusText.classList.replace('text-amber-500', 'text-red-500');
+                statusDot.classList.replace('bg-amber-500', 'bg-red-500');
+                statusDot.classList.remove('animate-pulse');
+                terminal.innerText += "\n\nError initializing environment:\n" + err;
+            }
+        }
+
+        async function runLiveCode() {
+            if (!pyodideReady) { showToast("Python environment is still loading.", "error"); return; }
+            
+            const btn = document.getElementById('run-code-btn');
+            const terminal = document.getElementById('output-terminal');
+            const container = document.getElementById('output-terminal-container');
+            const originalText = btn.innerHTML;
+            
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Executing...`;
+            btn.disabled = true;
+            
+            container.querySelectorAll('img').forEach(plot => plot.remove());
+            terminal.innerText = "Running script...\n\n";
+            pyodideInstance.runPython("sys.stdout.content = ''");
+            
+            const code = window.editor.getValue();
+            
+            setTimeout(async () => {
+                try {
+                    await pyodideInstance.runPythonAsync(code);
+                    const output = pyodideInstance.runPython("sys.stdout.content");
+                    terminal.innerText = output || "Script executed successfully with no output.";
+                } catch (err) { terminal.innerText = "Traceback / Error:\n" + err; } 
+                finally { btn.innerHTML = originalText; btn.disabled = false; }
+            }, 100);
+        }
+
+        function loadSnippet(key) {
+            const snip = SNIPPETS[key];
+            document.getElementById('snippet-title').innerText = snip.title;
+            if (window.editor) window.editor.setValue(snip.code);
+        }
+
+        // --- ACTIVITY & STREAK LOGIC ---
+        function checkActivityAndStreak() {
+            const now = Date.now();
+            const last = userData.lastActive || now;
+            const hoursSinceLast = (now - last) / (1000 * 60 * 60);
+
+            if (hoursSinceLast > 48) { userData.streak = 1; } 
+            else if (hoursSinceLast > 20 && hoursSinceLast <= 48) {
+                userData.streak += 1;
+                addXP(50);
+                showToast(`Daily Login Bonus! +50 XP. Streak: ${userData.streak} Days 🔥`, "success");
+            }
+            userData.lastActive = now;
+            saveUserData();
+        }
+
+        // --- UI RENDERERS ---
+        function handleReportUpload(platform, event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const btn = document.getElementById(`btn-sync-${platform}`);
+            const originalHtml = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> Extracting Data...`;
+            showToast(`Analyzing official report: ${file.name}...`, 'info');
+
+            setTimeout(() => {
+                let stats = {};
+                if (platform === 'khan') {
+                    stats = { mastery: Math.floor(Math.random() * 20) + 80, mins: Math.floor(Math.random() * 60) + 60 }; 
+                    userData.linkedAccounts.khan = { synced: true, ...stats };
+                } else if (platform === 'cb') {
+                    stats = { sat: Math.floor(Math.random() * 300) + 1200, ap: Math.floor(Math.random() * 2) + 3 }; 
+                    userData.linkedAccounts.cb = { synced: true, ...stats };
+                }
+
+                addXP(300);
+                showToast(`Successfully verified stats from ${file.name}! (+300 XP)`, "success");
+                saveUserData();
+                updateDashboard();
+                event.target.value = '';
+            }, 3000);
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active', 'bg-white/5');
+                btn.querySelector('.indicator').classList.add('opacity-0');
+            });
+            const activeBtn = document.getElementById(`nav-${tabId}`);
+            if(activeBtn) {
+                activeBtn.classList.add('active', 'bg-white/5');
+                activeBtn.querySelector('.indicator').classList.remove('opacity-0');
+            }
+
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+
+            if(tabId === 'dashboard') updateDashboard();
+            if(tabId === 'subjects') renderSubjects();
+            if(tabId === 'assessments') updateAssessmentStats();
+            if(tabId === 'projects') renderProjects();
+            if(tabId === 'archive') renderArchive();
+            if(tabId === 'library') renderLibrary();
+            if(tabId === 'leaderboard') renderLeaderboard('daily');
+            if(tabId === 'certificates') renderCertificates();
+            if(tabId === 'community') renderCommunity();
+            if(tabId === 'lab' && window.editor) setTimeout(() => window.editor.refresh(), 100);
+        }
+
+        function changeTrack(track) {
+            userData.track = track;
+            userData.syllabus = JSON.parse(JSON.stringify(TRACK_SYLLABI[track] || TRACK_SYLLABI['CBSE_12']));
+            document.getElementById('subject-grade-display').innerText = userData.track.replace('_', ' ');
+            saveUserData();
+            updateUI();
+            renderArchive();
+            renderLibrary();
+            populatePomodoroSubjects();
+            showToast(`Switched curriculum track to ${track.replace('_', ' ')}!`, 'success');
+        }
+
+        function updateUI() {
+            updateDashboard();
+            if(!document.getElementById('tab-subjects').classList.contains('hidden')) renderSubjects();
+            if(!document.getElementById('tab-leaderboard').classList.contains('hidden')) renderLeaderboard('daily');
+        }
+
+        function updateDashboard() {
+            document.getElementById('dash-xp').innerText = userData.xp;
+            document.getElementById('dash-level').innerText = userData.level;
+            document.getElementById('dash-streak').innerText = userData.streak;
+            document.getElementById('nav-level-display').innerText = userData.level;
+
+            if (userData.linkedAccounts.khan && userData.linkedAccounts.khan.synced) {
+                document.getElementById('status-khan').innerText = "Verified via Report";
+                document.getElementById('status-khan').classList.add('text-green-400');
+                const btn = document.getElementById('btn-sync-khan');
+                btn.innerHTML = `<i class="fa-solid fa-file-arrow-up"></i> Update Report`;
+                btn.classList.replace('bg-white/10', 'bg-green-500/20');
+                
+                document.getElementById('stat-khan-mastery').innerText = userData.linkedAccounts.khan.mastery;
+                document.getElementById('stat-khan-mins').innerText = userData.linkedAccounts.khan.mins;
+                document.getElementById('khan-stats').classList.remove('hidden');
+            }
+            if (userData.linkedAccounts.cb && userData.linkedAccounts.cb.synced) {
+                document.getElementById('status-cb').innerText = "Verified via Score Report";
+                document.getElementById('status-cb').classList.add('text-green-400');
+                const btn = document.getElementById('btn-sync-cb');
+                btn.innerHTML = `<i class="fa-solid fa-file-arrow-up"></i> Update Score`;
+                btn.classList.replace('bg-white/10', 'bg-blue-500/20');
+                
+                document.getElementById('stat-cb-sat').innerText = userData.linkedAccounts.cb.sat;
+                document.getElementById('stat-cb-ap').innerText = userData.linkedAccounts.cb.ap;
+                document.getElementById('cb-stats').classList.remove('hidden');
+            }
+            
+            const nextLevelXp = userData.level * 1000;
+            const currentLevelBaseXp = (userData.level - 1) * 1000;
+            let percent = ((userData.xp - currentLevelBaseXp) / 1000) * 100;
+            document.getElementById('dash-xp-needed').innerText = Math.max(0, nextLevelXp - userData.xp);
+            document.getElementById('dash-xp-bar').style.width = `${Math.min(percent, 100)}%`;
+
+            const grid = document.getElementById('dashboard-progress-grid');
+            let html = '';
+            for (const [subjName, data] of Object.entries(userData.syllabus)) {
+                const total = data.topics.length;
+                const completed = data.topics.filter(t => t.completed).length;
+                const pct = total === 0 ? 0 : Math.round((completed / total) * 100);
+                data.progress = pct;
+                html += `
+                    <div class="glass-panel p-5 rounded-2xl border border-white/5 hover:border-${data.color}/30 transition-colors cursor-pointer" onclick="switchTab('subjects')">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-xl bg-${data.color}/10 text-${data.color} flex items-center justify-center"><i class="fa-solid ${data.icon}"></i></div>
+                                <h4 class="font-bold text-white text-sm md:text-base">${subjName}</h4>
+                            </div>
+                            <span class="text-sm font-mono text-${data.color}">${pct}%</span>
+                        </div>
+                        <div class="w-full h-1.5 bg-dark-bg rounded-full overflow-hidden">
+                            <div class="h-full bg-${data.color} rounded-full" style="width: ${pct}%"></div>
+                        </div>
+                    </div>`;
+            }
+            grid.innerHTML = html;
+        }
+
+        function renderSubjects() {
+            const container = document.getElementById('subjects-container');
+            let html = '';
+            for (const [subjName, data] of Object.entries(userData.syllabus)) {
+                const total = data.topics.length;
+                const completedTopics = data.topics.filter(t => t.completed);
+                const completed = completedTopics.length;
+                const pct = total === 0 ? 0 : Math.round((completed / total) * 100);
+
+                let topicsHtml = data.topics.map((topic, index) => `
+                    <div class="py-2 border-b border-white/5 last:border-0 flex items-center justify-between group">
+                        <label class="flex items-center cursor-pointer flex-1" onclick="handleTopicClick('${subjName}', '${topic.id}', event)">
+                            <div class="topic-checkbox ${topic.completed ? 'bg-neon-purple border-neon-purple' : ''}">
+                                ${topic.completed ? '<div style="position:absolute;left:6px;top:2px;width:5px;height:10px;border:solid white;border-width:0 2px 2px 0;transform:rotate(45deg);"></div>' : ''}
+                            </div>
+                            <span class="ml-3 text-slate-300 group-hover:text-white transition-colors text-sm lg:text-base ${topic.completed ? 'line-through text-slate-500' : ''}">${index + 1}. ${topic.title}</span>
+                        </label>
+                        <div class="flex items-center gap-3 ml-2">
+                            ${topic.completed ? `<span class="text-[10px] text-neon-green font-mono border border-neon-green/30 px-2 py-0.5 rounded-full bg-neon-green/10">+50 XP</span>` : ''}
+                            ${topic.completed ? `<button onclick="triggerTest('${subjName}', ['${topic.title}'], 'Topic')" class="text-red-400 hover:text-red-300 opacity-0 group-hover:opacity-100 transition-opacity bg-red-400/10 p-1.5 rounded-lg border border-red-400/20" title="Generate Topic Test"><i class="fa-solid fa-bullseye"></i></button>` : '<div class="w-8"></div>'}
+                        </div>
+                    </div>`).join('');
+                
+                const mixedTestBtn = completed >= 2 ? `<button onclick="triggerTest('${subjName}', ['${completedTopics[completed-1].title}', '${completedTopics[completed-2].title}'], 'Mixed')" class="text-xs bg-red-500/20 hover:bg-red-500/30 text-red-400 px-3 py-1.5 rounded-lg border border-red-500/30 transition-colors flex items-center gap-2"><i class="fa-solid fa-shuffle"></i> Test Last 2 Chapters</button>` : '';
+
+                html += `
+                    <div class="glass-panel rounded-3xl border border-white/5 overflow-hidden">
+                        <div class="p-6 bg-gradient-to-r from-${data.color}/10 to-transparent border-b border-${data.color}/20 flex flex-col md:flex-row justify-between md:items-end gap-4">
+                            <div class="flex items-center gap-4">
+                                <div class="w-14 h-14 rounded-2xl bg-${data.color}/20 text-${data.color} flex items-center justify-center shadow-[0_0_15px_rgba(var(--${data.color}-rgb),0.2)] text-2xl"><i class="fa-solid ${data.icon}"></i></div>
+                                <div>
+                                    <div class="flex items-center gap-3 mb-1"><h3 class="text-xl font-bold text-white leading-none">${subjName}</h3>${mixedTestBtn}</div>
+                                    <p class="text-sm text-slate-400">${completed} of ${total} Chapters Completed</p>
+                                </div>
+                            </div>
+                            <div class="w-full md:w-48 text-right">
+                                <div class="flex justify-between text-xs mb-1 font-mono text-${data.color}"><span>Progress</span><span>${pct}%</span></div>
+                                <div class="w-full h-2 bg-dark-bg rounded-full overflow-hidden"><div class="h-full bg-${data.color} rounded-full transition-all duration-500" style="width: ${pct}%"></div></div>
+                            </div>
+                        </div>
+                        <div class="p-6 max-h-[400px] overflow-y-auto no-scrollbar">${topicsHtml}</div>
+                    </div>`;
+            }
+            container.innerHTML = html;
+        }
+
+        function handleTopicClick(subjName, topicId, event) {
+            event.preventDefault();
+            const topic = userData.syllabus[subjName].topics.find(t => t.id === topicId);
+            
+            if (topic.completed) {
+                topic.completed = false;
+                userData.xp = Math.max(0, userData.xp - 50);
+                saveUserData();
+                renderSubjects();
+            } else {
+                pendingTopicCompletion = { subjName, topicId };
+                document.getElementById('doubt-topic-title').innerText = topic.title;
+                const baseQuery = encodeURIComponent(`CBSE ${subjName.split(' ')[0]} ${topic.title}`);
+                document.getElementById('yt-link-concept').href = `https://www.youtube.com/results?search_query=${baseQuery}+concept+explanation`;
+                document.getElementById('yt-link-oneshot').href = `https://www.youtube.com/results?search_query=${baseQuery}+one+shot`;
+                document.getElementById('yt-link-questions').href = `https://www.youtube.com/results?search_query=${baseQuery}+important+questions`;
+                
+                const modal = document.getElementById('doubt-action-modal');
+                modal.classList.remove('hidden'); void modal.offsetWidth;
+                modal.classList.remove('opacity-0');
+                document.getElementById('doubt-action-content').classList.remove('scale-95');
+            }
+        }
+
+        function closeDoubtModal() {
+            pendingTopicCompletion = null;
+            document.getElementById('doubt-action-modal').classList.add('opacity-0');
+            document.getElementById('doubt-action-content').classList.add('scale-95');
+            setTimeout(() => document.getElementById('doubt-action-modal').classList.add('hidden'), 300);
+        }
+
+        function confirmTopicCompletion() {
+            if (!pendingTopicCompletion) return;
+            const { subjName, topicId } = pendingTopicCompletion;
+            const topic = userData.syllabus[subjName].topics.find(t => t.id === topicId);
+            
+            topic.completed = true;
+            addXP(50);
+            confetti({ particleCount: 40, spread: 60, origin: { y: 0.8 }, colors: ['#b026ff', '#00f0ff', '#39ff14'] });
+            
+            saveUserData();
+            renderSubjects();
+            closeDoubtModal();
+        }
+
+        function addXP(amount) {
+            userData.xp += amount;
+            if (userData.xp >= userData.level * 1000) {
+                userData.level += 1;
+                confetti({ particleCount: 150, spread: 100, origin: { y: 0.5 }, colors: ['#b026ff', '#00f0ff', '#ff007f', '#39ff14'] });
+                showToast(`LEVEL UP! You are now Level ${userData.level} 🚀`, "success");
+            } else {
+                showToast(`+${amount} XP Gained!`, "success");
+            }
+            document.getElementById('nav-level-display').innerText = userData.level;
+            saveUserData();
+        }
+
+        function renderArchive() {
+            const container = document.getElementById('archive-grid');
+            const papers = ARCHIVE_PAPERS[userData.track] || ARCHIVE_PAPERS['CBSE_12'];
+            container.innerHTML = papers.map(paper => `
+                <div class="glass-panel p-5 rounded-2xl border border-white/5 hover:border-${paper.color}/30 transition-all flex flex-col justify-between group">
+                    <div>
+                        <div class="flex justify-between items-start mb-3">
+                            <span class="px-2 py-1 text-[10px] uppercase font-bold tracking-wider rounded bg-${paper.color}/10 text-${paper.color} border border-${paper.color}/20">${paper.year}</span>
+                            <i class="fa-solid ${paper.type === 'mock' ? 'fa-file-signature text-neon-green' : 'fa-file-pdf text-red-400'} text-xl"></i>
+                        </div>
+                        <h4 class="font-bold text-white leading-tight mb-2 group-hover:text-${paper.color} transition-colors">${paper.title}</h4>
+                    </div>
+                    <button class="mt-4 w-full py-2 rounded-xl bg-white/5 hover:bg-white/10 text-sm font-medium transition-colors flex items-center justify-center gap-2"><i class="fa-solid fa-download"></i> Access Paper</button>
+                </div>`).join('');
+        }
+        
+        function renderLibrary() {
+            const container = document.getElementById('library-container');
+            let category = userData.track; // This successfully grabs "CBSE_11" or "CBSE_12"
+            
+            if(userData.track.includes("JEE")) category = "JEE";
+            if(userData.track.includes("SAT")) category = "SAT";
+            if(userData.track.includes("AP")) category = "AP";
+            
+            // This pulls the correct array based on if they are in 11th or 12th grade
+            let html = (RESOURCE_LIBRARY[category] || RESOURCE_LIBRARY["CBSE_12"]).map(res => `
+                <div class="glass-panel p-6 rounded-3xl border border-white/10 hover:border-${res.color}/40 transition-all flex flex-col group relative overflow-hidden">
+                    <div class="absolute -right-10 -top-10 w-32 h-32 bg-${res.color}/10 rounded-full blur-2xl group-hover:bg-${res.color}/20 transition-all"></div>
+                    <div class="w-14 h-14 rounded-2xl bg-${res.color}/20 text-${res.color} flex items-center justify-center shadow-[0_0_15px_rgba(var(--${res.color}-rgb),0.2)] text-2xl mb-4 relative z-10"><i class="fa-solid ${res.icon}"></i></div>
+                    <h4 class="font-bold text-white text-lg mb-2 relative z-10">${res.title}</h4>
+                    <p class="text-sm text-slate-400 mb-6 flex-1 relative z-10 leading-relaxed">${res.desc}</p>
+                    <a href="${res.url}" target="_blank" class="w-full py-2.5 rounded-xl bg-white/5 hover:bg-${res.color} hover:text-dark-bg text-sm font-bold transition-colors border border-white/10 hover:border-${res.color} relative z-10 text-center block">Access Resource</a>
+                </div>`).join('');
+
+            if (userData.customResources && userData.customResources.length > 0) {
+                html += userData.customResources.map((cr, index) => `
+                    <div class="glass-panel p-6 rounded-3xl border border-neon-purple/40 bg-neon-purple/5 transition-all flex flex-col relative overflow-hidden">
+                        <div class="absolute -right-10 -top-10 w-32 h-32 bg-neon-purple/20 rounded-full blur-2xl"></div>
+                        <div class="flex justify-between items-start mb-4 relative z-10">
+                            <div class="w-14 h-14 rounded-2xl bg-neon-purple/20 text-neon-purple flex items-center justify-center text-2xl"><i class="fa-solid fa-brain"></i></div>
+                            <span class="px-2 py-1 text-[10px] uppercase font-bold tracking-wider rounded bg-neon-purple/20 text-neon-purple border border-neon-purple/30">AI Learned</span>
+                        </div>
+                        <h4 class="font-bold text-white text-lg mb-2 relative z-10">${cr.title}</h4>
+                        <p class="text-xs text-slate-400 mb-4 flex-1 relative z-10 leading-relaxed line-clamp-3">${cr.content}</p>
+                        <button onclick="removeCustomResource(${index})" class="w-full py-2 rounded-xl bg-red-500/10 text-red-400 hover:bg-red-500/20 text-xs font-bold transition-colors border border-red-500/20 relative z-10">Remove from Memory</button>
+                    </div>`).join('');
+            }
+            container.innerHTML = html;
+        }
+
+        function openCustomResourceModal() {
+            const modal = document.getElementById('custom-resource-modal');
+            modal.classList.remove('hidden'); void modal.offsetWidth;
+            modal.classList.remove('opacity-0');
+            document.getElementById('custom-resource-content').classList.remove('scale-95');
+        }
+
+        function closeCustomResourceModal() {
+            document.getElementById('custom-resource-modal').classList.add('opacity-0');
+            document.getElementById('custom-resource-content').classList.add('scale-95');
+            setTimeout(() => document.getElementById('custom-resource-modal').classList.add('hidden'), 300);
+        }
+
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            document.getElementById('cr-content').value = "Reading file content...";
+            reader.onload = e => {
+                if (!document.getElementById('cr-title').value) document.getElementById('cr-title').value = file.name.split('.').slice(0, -1).join('.') || file.name;
+                document.getElementById('cr-content').value = e.target.result;
+                showToast(`Extracted text from ${file.name}`, 'success');
+                event.target.value = ''; 
+            };
+            reader.readAsText(file);
+        }
+
+        function saveCustomResource() {
+            const title = document.getElementById('cr-title').value.trim();
+            const content = document.getElementById('cr-content').value.trim();
+            if (!title || !content) return showToast("Title and content are required.", "error");
+
+            const btn = document.getElementById('btn-save-cr');
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Training AI...`;
+            
+            setTimeout(() => {
+                userData.customResources.push({ title, content, dateAdded: Date.now() });
+                saveUserData();
+                renderLibrary();
+                closeCustomResourceModal();
+                btn.innerHTML = `<i class="fa-solid fa-database"></i> Inject into AI Memory`;
+                showToast("Material ingested! AI Tutor knowledge upgraded.", "success");
+                addXP(50);
+            }, 1000);
+        }
+
+        function removeCustomResource(index) {
+            userData.customResources.splice(index, 1);
+            saveUserData();
+            renderLibrary();
+            showToast("Material forgotten.", "info");
+        }
+
+        function renderProjects() {
+            const container = document.getElementById('projects-grid');
+            const projects = [
+                { title: 'AI-Enabled Attendance', domain: 'Computer Vision', sdg: 'SDG 3 & 4', desc: 'Facial recognition technology integrated with automatic email notifications.' },
+                { title: 'Breast Cancer Detection', domain: 'Supervised Learning', sdg: 'SDG 3', desc: 'An AI-powered model using logistic regression to analyze medical scans.' },
+                { title: 'Library Management System', domain: 'Python + SQL', sdg: 'SDG 4', desc: 'A robust CBSE CS project linking a Python backend with a SQL database to track book inventory.' },
+                { title: 'Leak Weak Chatbot', domain: 'Dialogflow NLP', sdg: 'SDG 3 & 4', desc: 'An educational conversational agent promoting menstrual health awareness.' }
+            ];
+            container.innerHTML = projects.map(p => `
+                <div class="glass-panel p-6 rounded-3xl border border-white/10 hover:border-yellow-400/40 transition-all flex flex-col group relative overflow-hidden">
+                    <div class="absolute -right-10 -top-10 w-32 h-32 bg-yellow-400/10 rounded-full blur-2xl group-hover:bg-yellow-400/20 transition-all"></div>
+                    <div class="flex justify-between items-start mb-4 relative z-10">
+                        <span class="px-3 py-1 text-[10px] uppercase font-bold tracking-widest rounded-lg bg-yellow-400/10 text-yellow-400 border border-yellow-400/20">${p.domain}</span>
+                        <span class="text-xs text-slate-300 font-mono font-bold bg-dark-bg px-2 py-1 rounded border border-white/5">${p.sdg}</span>
+                    </div>
+                    <h4 class="font-bold text-white text-xl mb-3 relative z-10">${p.title}</h4>
+                    <p class="text-sm text-slate-400 mb-6 flex-1 relative z-10 leading-relaxed">${p.desc}</p>
+                    <button onclick="openBlueprint('${p.title}', '${p.desc}')" class="w-full py-2.5 rounded-xl bg-white/5 hover:bg-yellow-400 hover:text-dark-bg text-sm font-bold transition-colors border border-white/10 hover:border-yellow-400 relative z-10">View Blueprint</button>
+                </div>`).join('');
+        }
+        
+        function openBlueprint(title, desc) {
+            document.getElementById('bp-title').innerText = title;
+            document.getElementById('bp-desc').innerText = desc;
+            const modal = document.getElementById('project-blueprint-modal');
+            modal.classList.remove('hidden'); void modal.offsetWidth;
+            modal.classList.remove('opacity-0');
+            document.getElementById('project-blueprint-content').classList.remove('scale-95');
+        }
+
+        function closeBlueprint() {
+            document.getElementById('project-blueprint-modal').classList.add('opacity-0');
+            document.getElementById('project-blueprint-content').classList.add('scale-95');
+            setTimeout(() => document.getElementById('project-blueprint-modal').classList.add('hidden'), 300);
+        }
+
+        function startProjectLab() {
+            closeBlueprint();
+            switchTab('lab');
+            showToast("Workspace initialized for your Capstone Project!", "success");
+            loadSnippet('blank');
+        }
+        
+        // --- COMMUNITY LOGIC ---
+        function renderCommunity() {
+            const feed = document.getElementById('community-feed');
+            if (userData.communityPosts.length === 0) {
+                feed.innerHTML = `<p class="text-slate-500 italic p-4">No questions asked yet. Be the first to start a discussion!</p>`;
+                return;
+            }
+            
+            feed.innerHTML = userData.communityPosts.map(post => `
+                <div class="bg-dark-bg p-4 rounded-2xl border border-white/5">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-xs"><i class="fa-solid fa-user text-slate-400"></i></div>
+                        <div>
+                            <p class="text-xs font-bold text-white">${post.author}</p>
+                            <p class="text-[10px] text-slate-500">${post.time}</p>
+                        </div>
+                    </div>
+                    <p class="text-sm text-slate-200 mb-4">${post.text}</p>
+                    
+                    ${post.replies.length > 0 ? `
+                        <div class="ml-6 space-y-3 mb-4 pl-4 border-l-2 border-slate-700">
+                            ${post.replies.map(reply => `
+                                <div class="bg-white/5 p-3 rounded-xl">
+                                    <p class="text-[10px] font-bold text-green-400 mb-1">${reply.author} <span class="text-slate-500 font-normal">replied:</span></p>
+                                    <p class="text-xs text-slate-300">${reply.text}</p>
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : ''}
+                    
+                    <div class="flex gap-2 mt-3">
+                        <input type="text" id="reply-input-${post.id}" placeholder="Type an answer to help..." class="flex-1 bg-dark-surface border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-green-400/50">
+                        <button onclick="postReply(${post.id})" class="px-3 py-1.5 bg-white/10 hover:bg-green-500 hover:text-dark-bg rounded-lg text-xs font-bold transition-colors">Reply</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function postToCommunity() {
+            const input = document.getElementById('community-post-input');
+            const text = input.value.trim();
+            if (!text) return;
+            
+            const author = document.getElementById('nav-user-email').innerText + "@quantum.edu";
+            userData.communityPosts.unshift({ id: Date.now(), author: author, text: text, time: "Just now", replies: [] });
+            
+            input.value = "";
+            saveUserData();
+            renderCommunity();
+            showToast("Question posted to the community!", "success");
+        }
+        
+        function postReply(postId) {
+            const input = document.getElementById(`reply-input-${postId}`);
+            const text = input.value.trim();
+            if (!text) return;
+            
+            const post = userData.communityPosts.find(p => p.id === postId);
+            if (post) {
+                const author = document.getElementById('nav-user-email').innerText;
+                post.replies.push({ author: author, text: text });
+                saveUserData();
+                renderCommunity();
+                addXP(10);
+                showToast("Reply posted! +10 XP for helping.", "success");
+            }
+        }
+
+        // --- ASSESSMENTS LOGIC ---
+        function updateAssessmentStats() {
+            const p = userData.performance;
+            document.getElementById('stats-tests-taken').innerText = p.testsTaken;
+            document.getElementById('stats-avg-score').innerText = `${p.testsTaken > 0 ? Math.round((p.totalScore / (p.testsTaken * 10)) * 100) : 0}%`;
+            document.getElementById('recent-tests-list').innerHTML = p.history.length === 0 ? `<p class="text-slate-500 italic">No tests taken yet.</p>` : p.history.slice(-5).reverse().map(h => `<div class="flex justify-between items-center bg-white/5 p-2 rounded-lg"><span class="text-slate-300 truncate pr-2">${h.title}</span><span class="font-mono text-${h.score >= 7 ? 'neon-green' : h.score >= 4 ? 'amber-400' : 'red-400'}">${h.score}/10</span></div>`).join('');
+        }
+
+        async function triggerTest(subject, topicTitles, type) {
+            switchTab('assessments');
+            document.getElementById('assessment-home').classList.add('hidden');
+            document.getElementById('assessment-results').classList.add('hidden');
+            document.getElementById('assessment-arena').classList.remove('hidden');
+            document.getElementById('test-generating-overlay').classList.remove('hidden');
+            
+            document.getElementById('arena-test-title').innerText = type === 'Mixed' ? `Mixed Test: ${subject}` : `Topic Test: ${topicTitles[0]}`;
+            activeTestContext = { subject, topicTitles, title: type === 'Mixed' ? `Mixed Test: ${subject}` : `Topic Test: ${topicTitles[0]}` };
+
+            const systemPrompt = `You are a strict CBSE Board Examiner. Generate a practice test for Grade 11/12 on the topics: ${topicTitles.join(', ')}. 
+            Format strictly in Markdown. 
+            Include: 
+            1) 3 high-quality questions (1 MCQs, 1 Short Answer, 1 Competency/Case-Study based).
+            2) DO NOT PROVIDE ANSWERS. 
+            3) At the very bottom, include a section called "Board Exam Marking Scheme & Tips" explaining exactly how marks will be allocated for these types of questions (e.g., Step marks, Formula marks) and give 2 specific preparation tips for this chapter.`;
+            
+            const payload = { contents: [{ role: "user", parts: [{ text: "Generate CBSE standard practice test" }] }], systemInstruction: { parts: [{ text: systemPrompt }] } };
+            const apiKey = "AQ.Ab8RN6KhXBNFJe-BZsBruot4JdMM8524SwF1KNIzgxZolfAKQg";
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+
+            try {
+                const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                const result = await response.json();
+                if (result.candidates) {
+                    activeTestContext.testMarkdown = result.candidates[0].content.parts[0].text;
+                    document.getElementById('arena-test-content').innerHTML = marked.parse(activeTestContext.testMarkdown);
+                    document.getElementById('test-generating-overlay').classList.add('hidden');
+                }
+            } catch (err) {
+                document.getElementById('arena-test-content').innerHTML = `<p class="text-red-400">Error connecting to AI Test Generator. Please check your internet connection.</p>`;
+                document.getElementById('test-generating-overlay').classList.add('hidden');
+            }
+        }
+
+        async function submitAssessment() {
+            const btn = document.getElementById('arena-submit-btn');
+            const answers = document.getElementById('arena-answer-input').value.trim();
+            if (!answers) return showToast("Please type some answers to submit.", "error");
+
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Grading with AI...`;
+            btn.disabled = true;
+
+            const systemPrompt = `You are a strict CBSE examiner. You generated this test: "${activeTestContext.testMarkdown}". The student provided these answers: "${answers}". 
+            Evaluate their answers out of 10 points total. Be critical but fair. Point out exact mistakes.
+            Format response as JSON: {"score": <number 0-10>, "feedbackMarkdown": "<string explaining exactly where marks were lost/gained in Markdown>"} 
+            Return ONLY raw valid JSON, no backticks.`;
+
+            const payload = { contents: [{ role: "user", parts: [{ text: "Evaluate my answers based on the prompt." }] }], systemInstruction: { parts: [{ text: systemPrompt }] } };
+            const apiKey = "AQ.Ab8RN6KhXBNFJe-BZsBruot4JdMM8524SwF1KNIzgxZolfAKQg";
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+
+            try {
+                const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                const result = await response.json();
+                let evalData = JSON.parse(result.candidates[0].content.parts[0].text);
+                
+                document.getElementById('assessment-arena').classList.add('hidden');
+                document.getElementById('assessment-results').classList.remove('hidden');
+                
+                document.getElementById('result-score-display').innerText = `${evalData.score}/10`;
+                const xpEarned = evalData.score * 20;
+                document.getElementById('result-xp-display').innerText = `+${xpEarned} XP Earned`;
+                document.getElementById('result-feedback-content').innerHTML = marked.parse(evalData.feedbackMarkdown);
+                
+                userData.performance.testsTaken += 1;
+                userData.performance.totalScore += evalData.score;
+                userData.performance.history.push({ title: activeTestContext.title, score: evalData.score });
+                
+                addXP(xpEarned);
+                updateAssessmentStats();
+                saveUserData();
+            } catch (err) {
+                showToast("Failed to grade test. Please try again.", "error");
+            } finally {
+                btn.innerHTML = `Submit for AI Grading`;
+                btn.disabled = false;
+                document.getElementById('arena-answer-input').value = '';
+            }
+        }
+
+        function closeAssessment() {
+            document.getElementById('assessment-results').classList.add('hidden');
+            document.getElementById('assessment-arena').classList.add('hidden');
+            document.getElementById('assessment-home').classList.remove('hidden');
+        }
+
+        // --- LEADERBOARD & CERTIFICATES ---
+        function filterLeaderboard(timeframe) {
+            document.querySelectorAll('.lb-filter').forEach(b => {
+                b.classList.remove('active', 'text-yellow-400', 'bg-yellow-400/10');
+                b.classList.add('text-slate-400');
+            });
+            event.target.classList.add('active', 'text-yellow-400', 'bg-yellow-400/10');
+            event.target.classList.remove('text-slate-400');
+            renderLeaderboard(timeframe);
+        }
+
+        function renderLeaderboard(timeframe) {
+            const list = document.getElementById('leaderboard-list');
+            const userName = document.getElementById('nav-user-email').innerText;
+            
+            let students = [
+                { name: "Rahul S.", xp: 14500, comp: 95 },
+                { name: "Priya M.", xp: 13200, comp: 88 },
+                { name: "Aarav K.", xp: 12100, comp: 75 },
+                { name: "Sneha V.", xp: 9500, comp: 60 },
+                { name: "Arjun P.", xp: 8200, comp: 55 }
+            ];
+
+            let totalTopics = 0; let completedTopics = 0;
+            for (const [subjName, data] of Object.entries(userData.syllabus)) {
+                totalTopics += data.topics.length;
+                completedTopics += data.topics.filter(t => t.completed).length;
+            }
+            const progressPct = totalTopics === 0 ? 0 : Math.round((completedTopics / totalTopics) * 100);
+
+            students.push({ name: userName + " (You)", xp: userData.xp, comp: progressPct, isUser: true });
+
+            let multiplier = timeframe === 'yearly' ? 10 : (timeframe === 'monthly' ? 4 : (timeframe === 'weekly' ? 2 : 1));
+            students = students.map(s => ({...s, xp: s.isUser ? s.xp : s.xp * multiplier }));
+
+            if (timeframe === 'yearly') {
+                students = students.filter(s => s.comp === 100 || s.isUser);
+                if (!students.find(s => !s.isUser)) students.push({ name: "Elite Scholar", xp: 50000, comp: 100 });
+            }
+
+            students.sort((a,b) => b.xp - a.xp);
+
+            document.getElementById('podium-1-name').innerText = students[0] ? students[0].name : '-';
+            document.getElementById('podium-2-name').innerText = students[1] ? students[1].name : '-';
+            document.getElementById('podium-3-name').innerText = students[2] ? students[2].name : '-';
+
+            list.innerHTML = students.slice(3).map((s, idx) => `
+                <div class="flex items-center justify-between p-3 bg-dark-bg rounded-xl border border-white/5 ${s.isUser ? 'border-yellow-400/50 bg-yellow-400/5' : ''}">
+                    <div class="flex items-center gap-4">
+                        <span class="text-slate-500 font-bold w-6 text-center">#${idx + 4}</span>
+                        <span class="text-sm font-bold ${s.isUser ? 'text-yellow-400' : 'text-slate-300'}">${s.name}</span>
+                        ${timeframe === 'yearly' && s.comp < 100 ? `<span class="text-[10px] text-red-400 bg-red-400/10 px-2 py-0.5 rounded ml-2">Needs 100% Completion</span>` : ''}
+                    </div>
+                    <span class="text-sm font-mono text-neon-blue">${s.xp} XP</span>
+                </div>
+            `).join('');
+        }
+
+        function renderCertificates() {
+            const userName = document.getElementById('nav-user-email').innerText || "Quantum Student";
+            
+            let totalTopics = 0; let completedTopics = 0;
+            for (const [subjName, data] of Object.entries(userData.syllabus)) {
+                totalTopics += data.topics.length;
+                completedTopics += data.topics.filter(t => t.completed).length;
+            }
+            const progressPct = totalTopics === 0 ? 0 : Math.round((completedTopics / totalTopics) * 100);
+
+            let simulatedScores = [12500, 9800, 7200, 4500, 3000];
+            simulatedScores.push(userData.xp);
+            simulatedScores.sort((a,b) => b - a);
+            const userRank = simulatedScores.indexOf(userData.xp) + 1;
+
+            const monthlyContainer = document.getElementById('monthly-cert-container');
+            if (userRank <= 3) {
+                let borderClass = userRank === 1 ? 'cert-border-gold' : (userRank === 2 ? 'cert-border-silver' : 'cert-border-bronze');
+                let sealGradient = userRank === 1 ? 'from-yellow-400 to-yellow-600' : (userRank === 2 ? 'from-slate-300 to-slate-500' : 'from-amber-600 to-orange-700');
+                let rankTitle = userRank === 1 ? '1st Place Champion' : (userRank === 2 ? '2nd Place Runner-Up' : '3rd Place Achiever');
+                
+                monthlyContainer.innerHTML = `
+                    <div class="cert-paper ${borderClass} rounded-2xl p-10 lg:p-14 text-center max-w-4xl mx-auto shadow-2xl" id="print-cert-monthly">
+                        <div class="cert-seal bg-gradient-to-br ${sealGradient}"><i class="fa-solid fa-trophy"></i></div>
+                        <div class="w-20 h-20 bg-dark-bg text-white rounded-full flex items-center justify-center text-3xl mx-auto mb-6 shadow-md border-4 border-white"><i class="fa-solid fa-atom"></i></div>
+                        <h1 class="text-4xl lg:text-5xl font-black text-slate-800 uppercase tracking-widest mb-2 font-serif">Certificate of Excellence</h1>
+                        <p class="text-lg text-slate-500 uppercase tracking-widest mb-8 font-bold">Quantum Hub Monthly Leaderboard</p>
+                        <p class="text-slate-600 mb-2 italic">This certifies that</p>
+                        <h2 class="text-4xl lg:text-5xl font-bold text-slate-900 mb-6 py-4 border-b-2 border-slate-200 inline-block px-10 text-neon-purple font-serif">${userName}</h2>
+                        <p class="text-slate-600 max-w-xl mx-auto text-lg leading-relaxed">has demonstrated outstanding dedication, securing <strong class="text-slate-900">${rankTitle}</strong> on the competitive Monthly Leaderboard with <strong class="text-slate-900">${userData.xp} XP</strong>.</p>
+                        <div class="mt-16 flex justify-between items-end px-10">
+                            <div class="text-center"><div class="border-b border-slate-400 w-40 mb-2"></div><p class="text-xs font-bold text-slate-500 uppercase tracking-widest">Date Achieved</p><p class="text-sm text-slate-800 font-bold">${new Date().toLocaleDateString()}</p></div>
+                            <div class="text-center"><h3 class="font-signature text-3xl text-slate-800 mb-1">Quantum Hub</h3><div class="border-b border-slate-400 w-40 mb-2"></div><p class="text-xs font-bold text-slate-500 uppercase tracking-widest">Official Signature</p></div>
+                        </div>
+                    </div>
+                    <div class="text-center mt-6"><button onclick="window.print()" class="px-6 py-3 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold transition-all"><i class="fa-solid fa-print mr-2"></i> Print / Save as PDF</button></div>`;
+            } else {
+                monthlyContainer.innerHTML = `<div class="glass-panel p-10 rounded-3xl border border-white/5 text-center flex flex-col items-center justify-center bg-dark-bg/50"><div class="w-20 h-20 rounded-full bg-slate-800 flex items-center justify-center mb-4 border border-white/10 text-slate-500 text-3xl"><i class="fa-solid fa-lock"></i></div><h3 class="text-xl font-bold text-white mb-2">Monthly Certificate Locked</h3><p class="text-slate-400 max-w-md">You are Rank #${userRank}. Reach Top 3 globally to unlock your official monthly certificate!</p></div>`;
+            }
+
+            const yearlyContainer = document.getElementById('yearly-cert-container');
+            if (progressPct === 100) {
+                yearlyContainer.innerHTML = `
+                    <div class="cert-paper cert-border-gold rounded-2xl p-10 lg:p-14 text-center max-w-4xl mx-auto shadow-2xl relative" id="print-cert-yearly">
+                        <div class="absolute inset-0 opacity-5 pointer-events-none flex items-center justify-center"><i class="fa-solid fa-graduation-cap text-[30rem]"></i></div>
+                        <div class="cert-seal bg-gradient-to-br from-yellow-300 to-yellow-600 border-4 border-white ring-4 ring-yellow-500/30"><i class="fa-solid fa-star"></i></div>
+                        <div class="w-24 h-24 bg-gradient-to-br from-yellow-400 to-orange-500 text-white rounded-full flex items-center justify-center text-4xl mx-auto mb-6 shadow-lg border-4 border-white"><i class="fa-solid fa-graduation-cap"></i></div>
+                        <h1 class="text-4xl lg:text-5xl font-black text-yellow-600 uppercase tracking-widest mb-2 font-serif" style="text-shadow: 1px 1px 0px rgba(0,0,0,0.1);">Gold Medal of Completion</h1>
+                        <p class="text-lg text-slate-500 uppercase tracking-widest mb-8 font-bold">${userData.track.replace('_', ' ')} Yearly Curriculum</p>
+                        <p class="text-slate-600 mb-2 italic">Proudly presented to</p>
+                        <h2 class="text-4xl lg:text-5xl font-bold text-slate-900 mb-6 py-4 border-b-2 border-yellow-500/50 inline-block px-10 font-serif">${userName}</h2>
+                        <p class="text-slate-600 max-w-xl mx-auto text-lg leading-relaxed">For demonstrating unparalleled academic excellence by completing <strong class="text-slate-900 bg-yellow-100 px-2 rounded">100%</strong> of the official syllabus requirements.</p>
+                        <div class="mt-16 flex justify-between items-end px-10 relative z-10">
+                            <div class="text-center"><div class="border-b border-slate-400 w-40 mb-2"></div><p class="text-xs font-bold text-slate-500 uppercase tracking-widest">Date of Mastery</p><p class="text-sm text-slate-800 font-bold">${new Date().toLocaleDateString()}</p></div>
+                            <div class="text-center"><h3 class="font-signature text-3xl text-yellow-600 mb-1">Director of Academics</h3><div class="border-b border-slate-400 w-40 mb-2"></div><p class="text-xs font-bold text-slate-500 uppercase tracking-widest">Quantum Hub Auth</p></div>
+                        </div>
+                    </div>
+                    <div class="text-center mt-6"><button onclick="window.print()" class="px-6 py-3 rounded-xl bg-gradient-to-r from-yellow-500 to-orange-500 text-white font-bold transition-all shadow-[0_0_15px_rgba(234,179,8,0.4)]"><i class="fa-solid fa-download mr-2"></i> Download Medal Certificate</button></div>`;
+            } else {
+                yearlyContainer.innerHTML = `<div class="glass-panel p-10 rounded-3xl border border-white/5 text-center flex flex-col items-center justify-center bg-dark-bg/50"><div class="w-20 h-20 rounded-full bg-slate-800 flex items-center justify-center mb-4 border border-white/10 text-yellow-600/50 text-3xl"><i class="fa-solid fa-medal"></i></div><h3 class="text-xl font-bold text-white mb-2">Yearly Medal Locked</h3><p class="text-slate-400 max-w-md mb-4">You have currently mastered <span class="text-white font-bold">${progressPct}%</span> of the curriculum. Reach 100% completion to earn the ultimate Gold Medal!</p><div class="w-full max-w-xs h-2 bg-dark-bg rounded-full overflow-hidden"><div class="h-full bg-yellow-500 rounded-full" style="width: ${progressPct}%"></div></div></div>`;
+            }
+        }
+
+        // --- POMODORO ADVANCED LOGIC ---
+        function populatePomodoroSubjects() {
+            const select = document.getElementById('pomodoro-subject');
+            if(!select) return;
+            select.innerHTML = Object.keys(userData.syllabus).map(sub => `<option value="${sub}">${sub}</option>`).join('');
+        }
+
+        let timerInterval; 
+        let currentTimerMode = 25;
+        let totalTime = 25 * 60;
+        let timeLeft = 25 * 60; 
+        let isTimerRunning = false; 
+        
+        function updateTimerDisplay() { 
+            document.getElementById('timer-display').innerText = `${Math.floor(timeLeft / 60).toString().padStart(2, '0')}:${(timeLeft % 60).toString().padStart(2, '0')}`; 
+            
+            const ring = document.getElementById('timer-ring');
+            if(ring && totalTime > 0) {
+                const pct = timeLeft / totalTime;
+                const circumference = 552.92;
+                const offset = circumference - (pct * circumference);
+                ring.style.strokeDashoffset = offset;
+                
+                let color = '#ff007f'; 
+                if(currentTimerMode === 40) color = '#b026ff'; 
+                if(currentTimerMode === 90) color = '#39ff14'; 
+                if(currentTimerMode === 5) color = '#00f0ff'; 
+                if(currentTimerMode === 20) color = '#3b82f6'; 
+                ring.style.stroke = color;
+                
+                const filterMatch = ring.className.match(/drop-shadow-\[0_0_15px_(rgba\([^)]+\))\]/);
+                if(filterMatch) ring.classList.remove(filterMatch[0]);
+                
+                let rgb = '255,0,127';
+                if(currentTimerMode === 40) rgb = '176,38,255';
+                if(currentTimerMode === 90) rgb = '57,255,20';
+                if(currentTimerMode === 5) rgb = '0,240,255';
+                if(currentTimerMode === 20) rgb = '59,130,246';
+                ring.style.filter = `drop-shadow(0 0 15px rgba(${rgb}, 0.6))`;
+            }
+        }
+
+        function setTimerMode(minutes) { 
+            pauseTimer(); 
+            currentTimerMode = minutes; 
+            totalTime = minutes * 60;
+            timeLeft = minutes * 60; 
+            updateTimerDisplay(); 
+            
+            ['25', '40', '90', '5', '20'].forEach(id => {
+                const btn = document.getElementById(`btn-timer-${id}`);
+                if(btn) {
+                    btn.classList.remove('ring-2', 'ring-white', 'scale-105');
+                    if(minutes.toString() === id) btn.classList.add('ring-2', 'ring-white', 'scale-105');
+                }
+            });
+        }
+
+        function playAlarmSound() {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                for (let i = 0; i < 3; i++) {
+                    setTimeout(() => {
+                        const osc = ctx.createOscillator();
+                        const gain = ctx.createGain();
+                        osc.connect(gain);
+                        gain.connect(ctx.destination);
+                        osc.type = 'sine'; 
+                        osc.frequency.setValueAtTime(880, ctx.currentTime); 
+                        osc.frequency.exponentialRampToValueAtTime(440, ctx.currentTime + 0.5); 
+                        gain.gain.setValueAtTime(1, ctx.currentTime);
+                        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 1);
+                        osc.start(ctx.currentTime);
+                        osc.stop(ctx.currentTime + 1);
+                    }, i * 600); 
+                }
+            } catch(e) { console.log("Audio not supported or blocked."); }
+        }
+        
+        function startTimer() {
+            if (isTimerRunning) return;
+            isTimerRunning = true;
+            timerInterval = setInterval(() => {
+                if (timeLeft > 0) { 
+                    timeLeft--; 
+                    updateTimerDisplay(); 
+                } else { 
+                    pauseTimer(); 
+                    playAlarmSound();
+                    
+                    if(currentTimerMode === 25) { 
+                        completePomodoroSession(25);
+                        setTimerMode(5);
+                    } else if (currentTimerMode === 40) {
+                        completePomodoroSession(40);
+                        setTimerMode(20);
+                    } else if (currentTimerMode === 90) {
+                        completePomodoroSession(90);
+                        setTimerMode(20);
+                    } else {
+                        showToast("Break is over! Time to get back to work.", "info");
+                        setTimerMode(25);
+                    }
+                }
+            }, 1000);
+        }
+
+        function pauseTimer() { clearInterval(timerInterval); isTimerRunning = false; }
+        function resetTimer() { pauseTimer(); timeLeft = currentTimerMode * 60; updateTimerDisplay(); }
+        
+        function completePomodoroSession(minutes) {
+            const subject = document.getElementById('pomodoro-subject').value;
+            if(!userData.pomodoroHistory) userData.pomodoroHistory = { todayCount: 0, date: new Date().toDateString(), subjectsStudied: [] };
+            
+            userData.pomodoroHistory.todayCount += 1;
+            if (subject && !userData.pomodoroHistory.subjectsStudied.includes(subject)) {
+                userData.pomodoroHistory.subjectsStudied.push(subject);
+            }
+            
+            let xpGained = 25; 
+            if (minutes === 40) xpGained = 40; 
+            if (minutes === 90) xpGained = 100; 
+            
+            if (userData.pomodoroHistory.todayCount >= 3 && userData.pomodoroHistory.subjectsStudied.length >= 2) xpGained += 150;
+            else if (userData.pomodoroHistory.todayCount >= 5 && userData.pomodoroHistory.subjectsStudied.length >= 3) xpGained += 300;
+            
+            addXP(xpGained);
+            document.getElementById('pomo-count-display').innerText = userData.pomodoroHistory.todayCount;
+            showToast(`Deep work session complete! +${xpGained} XP. Reward yourself!`, "success");
+            saveUserData();
+        }
+
+        function appendToChat(role, htmlContent) {
+            const chatHistoryContainer = document.getElementById('chat-history');
+            const isUser = role === 'user';
+            
+            const wrapper = document.createElement('div');
+            wrapper.className = `flex w-full ${isUser ? 'justify-end' : 'justify-start'}`;
+            
+            let content = '';
+            if (isUser) {
+                content = `
+                <div class="max-w-[85%] lg:max-w-[75%]">
+                    <p class="text-xs text-slate-500 mb-1 mr-2 font-medium text-right">You <i class="fa-solid fa-user ml-1"></i></p>
+                    <div class="glass-panel p-4 rounded-2xl rounded-tr-sm bg-neon-purple/20 border-neon-purple/30 text-sm shadow-lg text-white">
+                        ${htmlContent}
+                    </div>
+                </div>`;
+            } else {
+                content = `
+                <div class="max-w-[85%] lg:max-w-[75%]">
+                    <p class="text-xs text-slate-500 mb-1 ml-2 font-medium"><i class="fa-solid fa-robot mr-1"></i> Quantum AI</p>
+                    <div class="glass-panel p-4 rounded-2xl rounded-tl-sm border border-neon-pink/20 text-sm chat-markdown shadow-lg text-slate-200">
+                        ${marked.parse(htmlContent)}
+                    </div>
+                </div>`;
+            }
+            
+            wrapper.innerHTML = content;
+            chatHistoryContainer.appendChild(wrapper);
+            chatHistoryContainer.scrollTop = chatHistoryContainer.scrollHeight;
+        }
+
+        function clearChat() { chatHistory = []; document.getElementById('chat-history').innerHTML = ''; clearChatImage(); }
+
+        function handleChatImageUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                pendingChatImageBase64 = e.target.result.split(',')[1];
+                pendingChatImageMimeType = file.type;
+                
+                const previewContainer = document.getElementById('image-preview-container');
+                previewContainer.innerHTML = `
+                    <div class="relative w-20 h-20 rounded-lg overflow-hidden border border-white/20">
+                        <img src="${e.target.result}" class="w-full h-full object-cover">
+                        <button onclick="clearChatImage()" class="absolute top-1 right-1 w-5 h-5 bg-red-500 rounded-full text-white text-[10px] flex items-center justify-center hover:bg-red-600 transition-colors"><i class="fa-solid fa-times"></i></button>
+                    </div>`;
+                previewContainer.classList.remove('hidden');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function clearChatImage() {
+            pendingChatImageBase64 = null;
+            pendingChatImageMimeType = null;
+            const previewContainer = document.getElementById('image-preview-container');
+            previewContainer.innerHTML = '';
+            previewContainer.classList.add('hidden');
+            document.getElementById('chat-image-upload').value = '';
+        }
+
+        async function sendChatMessage() {
+            if (isWaitingForAI) return;
+            const input = document.getElementById('chat-input');
+            const text = input.value.trim();
+            if (!text && !pendingChatImageBase64) return;
+            
+            input.value = ''; input.style.height = 'auto'; 
+            
+            let userParts = [];
+            if (text) userParts.push({ text: text });
+            
+            let displayHtml = text;
+            if (pendingChatImageBase64) {
+                userParts.push({
+                    inlineData: { mimeType: pendingChatImageMimeType, data: pendingChatImageBase64 }
+                });
+                displayHtml += `<div class="mt-3"><img src="data:${pendingChatImageMimeType};base64,${pendingChatImageBase64}" class="max-w-[200px] rounded-lg border border-white/10"></div>`;
+            }
+            
+            appendToChat('user', displayHtml);
+            chatHistory.push({ role: "user", parts: userParts });
+            clearChatImage(); 
+            isWaitingForAI = true;
+
+            const apiKey = "AQ.Ab8RN6KhXBNFJe-BZsBruot4JdMM8524SwF1KNIzgxZolfAKQg";
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+
+            try {
+                const payload = {
+                    contents: chatHistory,
+                    systemInstruction: { parts: [{ text: "You are Quantum AI, a highly advanced, encouraging, and expert CBSE, JEE, SAT, and AP study tutor. Use markdown formatting. Provide concise, helpful answers. Use the context of the student's current grade and subjects to give personalized advice. If the user provides an image, carefully analyze it and walk them through the solution step-by-step." }] }
+                };
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                const result = await response.json();
+                
+                if (result.candidates && result.candidates.length > 0 && result.candidates[0].content) {
+                    const aiText = result.candidates[0].content.parts[0].text;
+                    chatHistory.push({ role: "model", parts: [{ text: aiText }] });
+                    appendToChat('model', aiText);
+                } else {
+                    throw new Error("Invalid response format from Gemini.");
+                }
+            } catch (error) {
+                console.error("AI Error:", error);
+                appendToChat('model', "Sorry, I lost connection to the cloud neural network. Please check your internet and try again.");
+            } finally {
+                isWaitingForAI = false;
+            }
+        }
+
+        function showToast(msg, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `p-4 rounded-xl shadow-lg transition-all duration-300 text-white backdrop-blur-md ${type === 'success' ? 'bg-green-900/80 border-neon-green/50' : type === 'error' ? 'bg-red-900/80 border-red-500/50' : 'bg-blue-900/80 border-neon-blue/50'}`;
+            toast.innerHTML = `<span class="font-medium text-sm">${msg}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+    </script>
+</body>
+</html>
