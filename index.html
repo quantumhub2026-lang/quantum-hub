@@ -1793,7 +1793,17 @@ plt.show = custom_show
             saveUserData();
         }
 
-        function renderArchive() {
+       function renderArchive() {
+            // Check grade level and toggle PYQ visibility
+            const pyqSection = document.getElementById('class-12-pyqs');
+            if (pyqSection) {
+                if (userData.track === 'CBSE_12') {
+                    pyqSection.style.display = 'block';
+                } else {
+                    pyqSection.style.display = 'none';
+                }
+            }
+
             const container = document.getElementById('archive-grid');
             const papers = ARCHIVE_PAPERS[userData.track] || ARCHIVE_PAPERS['CBSE_12'];
             container.innerHTML = papers.map(paper => `
@@ -1808,7 +1818,6 @@ plt.show = custom_show
                     <button class="mt-4 w-full py-2 rounded-xl bg-white/5 hover:bg-white/10 text-sm font-medium transition-colors flex items-center justify-center gap-2"><i class="fa-solid fa-download"></i> Access Paper</button>
                 </div>`).join('');
         }
-        
         function renderLibrary() {
             const container = document.getElementById('library-container');
             let category = userData.track; // This successfully grabs "CBSE_11" or "CBSE_12"
