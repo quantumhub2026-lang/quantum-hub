@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" class="dark">
 <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quantum Hub | CBSE, JEE, SAT, AP</title>
@@ -83,6 +84,32 @@
         .cert-border-silver { border: 12px solid; border-image-slice: 1; border-width: 12px; border-image-source: linear-gradient(to right, #8e9eab, #eef2f3, #8e9eab); }
         .cert-border-bronze { border: 12px solid; border-image-slice: 1; border-width: 12px; border-image-source: linear-gradient(to right, #cd7f32, #f3cd9e, #cd7f32); }
         .cert-seal { position: absolute; bottom: 30px; right: 30px; width: 90px; height: 90px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2); font-size: 2.5rem; color: white; }
+    /* Mobile Responsive Design */
+@media (max-width: 768px) {
+    body {
+        padding: 10px;
+        font-size: 16px;
+    }
+    .container, .library-grid, .timer-container {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        margin: 0 auto;
+    }
+    /* Makes the glowing timer scale down for small screens */
+    .ring-container {
+        width: 280px !important;
+        height: 280px !important;
+    }
+    .button-group {
+        flex-direction: column;
+        gap: 10px;
+    }
+    button {
+        width: 100%;
+    }
+}
+    
     </style>
 </head>
 <body class="h-screen w-full flex overflow-hidden selection:bg-neon-purple selection:text-white relative">
@@ -519,6 +546,33 @@
                 </header>
                 <div id="library-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
             </div>
+            <div class="pyq-section" style="margin-top: 20px; padding: 15px; border-radius: 10px; background: rgba(255, 255, 255, 0.1);">
+    <h3 style="color: #00ffcc; text-align: center;">📜 Previous Year Board Papers (PYQs)</h3>
+    <p style="text-align: center; font-size: 14px; opacity: 0.8;">Official CBSE Past Papers for Board Prep</p>
+    
+    <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 15px;">
+        <a href="https://www.cbse.gov.in/cbsenew/question-paper.html" target="_blank" style="text-decoration: none;">
+            <button style="width: 100%; background: linear-gradient(45deg, #ff007f, #7f00ff); color: white; padding: 10px; border-radius: 5px; border: none; font-weight: bold;">
+                Physics (2019-2024 Papers)
+            </button>
+        </a>
+        <a href="https://www.cbse.gov.in/cbsenew/question-paper.html" target="_blank" style="text-decoration: none;">
+            <button style="width: 100%; background: linear-gradient(45deg, #ff007f, #7f00ff); color: white; padding: 10px; border-radius: 5px; border: none; font-weight: bold;">
+                Chemistry (2019-2024 Papers)
+            </button>
+        </a>
+        <a href="https://www.cbse.gov.in/cbsenew/question-paper.html" target="_blank" style="text-decoration: none;">
+            <button style="width: 100%; background: linear-gradient(45deg, #ff007f, #7f00ff); color: white; padding: 10px; border-radius: 5px; border: none; font-weight: bold;">
+                Mathematics (2019-2024 Papers)
+            </button>
+        </a>
+        <a href="https://www.cbse.gov.in/cbsenew/question-paper.html" target="_blank" style="text-decoration: none;">
+            <button style="width: 100%; background: linear-gradient(45deg, #ff007f, #7f00ff); color: white; padding: 10px; border-radius: 5px; border: none; font-weight: bold;">
+                Computer Science / AI (2019-2024 Papers)
+            </button>
+        </a>
+    </div>
+</div>
 
             <!-- ASSESSMENTS TAB -->
             <div id="tab-assessments" class="tab-content hidden animate-fade-in h-full flex flex-col pb-10">
