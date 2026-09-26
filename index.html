@@ -553,7 +553,7 @@
                     <h2 class="text-3xl font-bold mb-2">Quantum <span class="neon-text-gradient">Assessments</span></h2>
                     <p class="text-slate-400">Personalized tests generated from Previous Year Questions (PYQs).</p>
                 </header>
-<div class="pyq-section" style="margin-top: 20px; padding: 15px; border-radius: 10px; background: rgba(255, 255, 255, 0.1);">
+<div id="class-12-pyqs" class="pyq-section" style="display: none; margin-top: 20px; padding: 15px; border-radius: 10px; background: rgba(255, 255, 255, 0.1);">
     <h3 style="color: #00ffcc; text-align: center;">📜 Previous Year Board Papers (PYQs)</h3>
     <p style="text-align: center; font-size: 14px; opacity: 0.8;">Official CBSE Past Papers for Board Prep</p>
     
@@ -1568,10 +1568,21 @@ plt.show = custom_show
             if(tabId === 'lab' && window.editor) setTimeout(() => window.editor.refresh(), 100);
         }
 
-        function changeTrack(track) {
+       function changeTrack(track) {
             userData.track = track;
             userData.syllabus = JSON.parse(JSON.stringify(TRACK_SYLLABI[track] || TRACK_SYLLABI['CBSE_12']));
             document.getElementById('subject-grade-display').innerText = userData.track.replace('_', ' ');
+            
+            // Show PYQs in Exam Archive ONLY if CBSE 12 is selected
+            const pyqSection = document.getElementById('class-12-pyqs');
+            if (pyqSection) {
+                if (track === 'CBSE_12') {
+                    pyqSection.style.display = 'block'; // Make it visible
+                } else {
+                    pyqSection.style.display = 'none';  // Hide it for Class 11 and others
+                }
+            }
+
             saveUserData();
             updateUI();
             renderArchive();
