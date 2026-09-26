@@ -706,16 +706,15 @@
                 </div>
             </div>
 
-            <!-- ARCHIVE TAB -->
-           <!-- ARCHIVE TAB -->
+          <!-- ARCHIVE TAB -->
             <div id="tab-archive" class="tab-content hidden animate-fade-in">
                 <header class="mb-10">
                     <h2 class="text-3xl font-bold mb-2">Exam <span class="neon-text-gradient">Archive</span></h2>
                     <p class="text-slate-400">Previous Year Questions (PYQs) and Official Mock Papers.</p>
                 </header>
                 
-                <!-- CLASS 12 PYQ SECTION -->
-                <div id="class-12-pyqs" class="pyq-section" style="display: none; margin-top: 20px; padding: 15px; border-radius: 10px; background: rgba(255, 255, 255, 0.1); margin-bottom: 30px;">
+                <!-- NEW UNIQUE PYQ SECTION -->
+                <div id="archive-exclusive-pyqs" class="pyq-section" style="display: none; margin-top: 20px; padding: 15px; border-radius: 10px; background: rgba(255, 255, 255, 0.1); margin-bottom: 30px;">
                     <h3 style="color: #00ffcc; text-align: center;">📜 Previous Year Board Papers (PYQs)</h3>
                     <p style="text-align: center; font-size: 14px; opacity: 0.8;">Official CBSE Past Papers for Board Prep</p>
                     
@@ -744,7 +743,7 @@
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="archive-grid"></div>
-            </div>               
+            </div>        
 
             <!-- LAB TAB -->
             <div id="tab-lab" class="tab-content hidden animate-fade-in h-full flex flex-col pb-10">
@@ -1791,9 +1790,9 @@ plt.show = custom_show
             saveUserData();
         }
 
-       function renderArchive() {
-            // Check grade level and toggle PYQ visibility
-            const pyqSection = document.getElementById('class-12-pyqs');
+      function renderArchive() {
+            // Target the NEW unique ID specifically in the Archive tab
+            const pyqSection = document.getElementById('archive-exclusive-pyqs');
             if (pyqSection) {
                 if (userData.track === 'CBSE_12') {
                     pyqSection.style.display = 'block';
