@@ -1812,7 +1812,8 @@ plt.show = custom_show
                         </div>
                         <h4 class="font-bold text-white leading-tight mb-2 group-hover:text-${paper.color} transition-colors">${paper.title}</h4>
                     </div>
-                    <button class="mt-4 w-full py-2 rounded-xl bg-white/5 hover:bg-white/10 text-sm font-medium transition-colors flex items-center justify-center gap-2"><i class="fa-solid fa-download"></i> Access Paper</button>
+                    <!-- THIS IS THE LINE THAT CHANGED -->
+                    <button onclick="showToast('Downloading ${paper.title}...', 'success')" class="mt-4 w-full py-2 rounded-xl bg-white/5 hover:bg-white/10 text-sm font-medium transition-colors flex items-center justify-center gap-2"><i class="fa-solid fa-download"></i> Access Paper</button>
                 </div>`).join('');
         }
         function renderLibrary() {
