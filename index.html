@@ -258,6 +258,11 @@
                     <span class="hidden lg:block ml-3 font-medium">Assessments</span>
                     <div class="absolute inset-y-0 left-0 w-1 bg-red-400 rounded-r-md opacity-0 transition-opacity indicator"></div>
                 </button>
+                <button onclick="switchTab('exam-prep')" id="nav-exam-prep" class="nav-btn flex items-center p-3 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition-colors group">
+                <i class="fa-solid fa-calendar-day text-lg w-6 text-center group-hover:text-neon-purple transition-colors"></i>
+                <span class="hidden lg:block ml-3 font-medium">Exam Planner</span>
+                <div class="absolute inset-y-0 left-0 w-1 bg-neon-purple rounded-r-md opacity-0 transition-opacity indicator"></div>
+            </button>
                 <button onclick="switchTab('leaderboard')" id="nav-leaderboard" class="nav-btn flex items-center p-3 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition-all group relative">
                     <i class="fa-solid fa-trophy text-lg lg:w-6 text-center group-hover:text-yellow-400 transition-colors"></i>
                     <span class="hidden lg:block ml-3 font-medium">Leaderboard</span>
@@ -705,7 +710,67 @@
                     </section>
                 </div>
             </div>
+<!-- EXAM PREP TAB -->
+            <div id="tab-exam-prep" class="tab-content hidden animate-fade-in">
+                <header class="mb-8">
+                    <h2 class="text-3xl font-bold mb-2">Exam <span class="neon-text-gradient">Planner</span></h2>
+                    <p class="text-slate-400">Select your syllabus portions and generate a custom daily timetable with breaks.</p>
+                </header>
 
+                <div id="exam-setup-container" class="glass-panel p-6 rounded-2xl border border-white/5 mb-8">
+                    <h3 class="text-xl font-bold mb-4 text-white">1. Setup Your Exam</h3>
+                    <form id="exam-planner-form" onsubmit="generateExamTimetable(event)" class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm text-slate-400 mb-1">Exam Name (e.g., PA1, Half-Yearly)</label>
+                                <input type="text" id="exam-name" required class="w-full bg-dark-bg border border-white/10 rounded-xl px-4 py-2 text-white outline-none focus:border-neon-purple transition-colors">
+                            </div>
+                            <div>
+                                <label class="block text-sm text-slate-400 mb-1">Days Left Until Exam</label>
+                                <input type="number" id="exam-days" min="1" max="60" required class="w-full bg-dark-bg border border-white/10 rounded-xl px-4 py-2 text-white outline-none focus:border-neon-purple transition-colors">
+                            </div>
+                            <div>
+                                <label class="block text-sm text-slate-400 mb-1">Daily Study Start Time</label>
+                                <input type="time" id="exam-start-time" required class="w-full bg-dark-bg border border-white/10 rounded-xl px-4 py-2 text-white outline-none focus:border-neon-purple transition-colors">
+                            </div>
+                            <div>
+                                <label class="block text-sm text-slate-400 mb-1">Daily Study End Time</label>
+                                <input type="time" id="exam-end-time" required class="w-full bg-dark-bg border border-white/10 rounded-xl px-4 py-2 text-white outline-none focus:border-neon-purple transition-colors">
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4">
+                            <label class="block text-sm text-slate-400 mb-2">Select Chapters/Topics to Cover</label>
+                            <textarea id="exam-chapters" required placeholder="Type chapters separated by commas (e.g., Electrostatics, Current Electricity, Optics)" class="w-full h-24 bg-dark-bg border border-white/10 rounded-xl px-4 py-2 text-white outline-none focus:border-neon-purple transition-colors resize-none"></textarea>
+                        </div>
+
+                        <button type="submit" class="mt-4 w-full py-3 rounded-xl bg-gradient-to-r from-neon-purple to-neon-blue text-white font-bold hover:shadow-[0_0_20px_rgba(176,38,255,0.4)] transition-all">
+                            Generate Timetable
+                        </button>
+                    </form>
+                </div>
+
+                <div id="exam-timetable-container" class="hidden">
+                    <div class="flex justify-between items-end mb-4">
+                        <div>
+                            <h3 id="display-exam-name" class="text-2xl font-bold text-white"></h3>
+                            <p id="display-exam-meta" class="text-slate-400 text-sm"></p>
+                        </div>
+                        <button onclick="resetExamPlan()" class="px-4 py-2 rounded-xl bg-red-500/20 text-red-400 hover:bg-red-500/30 transition-colors text-sm font-bold">Clear Plan</button>
+                    </div>
+                    
+                    <div class="bg-dark-bg/50 border border-white/5 rounded-2xl p-5 mb-6">
+                        <h4 class="text-neon-green font-bold mb-2"><i class="fa-solid fa-lightbulb"></i> Preparation Strategy</h4>
+                        <ul class="list-disc list-inside text-sm text-slate-300 space-y-1">
+                            <li>Focus on deep work during active study blocks. Put your phone away.</li>
+                            <li>Use your 15-minute breaks to hydrate, stretch, or walk. Do not use social media.</li>
+                            <li>Check off topics as you finish them to track your progress and earn XP.</li>
+                        </ul>
+                    </div>
+
+                    <div id="timetable-schedule" class="space-y-4"></div>
+                </div>
+            </div>
           <!-- ARCHIVE TAB -->
             <div id="tab-archive" class="tab-content hidden animate-fade-in">
                 <header class="mb-10">
@@ -2527,6 +2592,132 @@ plt.show = custom_show
             container.appendChild(toast);
             setTimeout(() => toast.remove(), 3000);
         }
+        // --- EXAM PLANNER LOGIC ---
+        let currentExamPlan = null;
+
+        function loadExamPlan() {
+            const savedPlan = localStorage.getItem('quantum_exam_plan');
+            if (savedPlan) {
+                currentExamPlan = JSON.parse(savedPlan);
+                document.getElementById('exam-setup-container').classList.add('hidden');
+                document.getElementById('exam-timetable-container').classList.remove('hidden');
+                renderTimetableUI();
+            }
+        }
+
+        function generateExamTimetable(e) {
+            e.preventDefault();
+            const name = document.getElementById('exam-name').value;
+            const days = parseInt(document.getElementById('exam-days').value);
+            const start = document.getElementById('exam-start-time').value;
+            const end = document.getElementById('exam-end-time').value;
+            const chaptersRaw = document.getElementById('exam-chapters').value;
+            
+            const chapters = chaptersRaw.split(',').map(c => c.trim()).filter(c => c);
+            
+            // Calculate total minutes available per day
+            const startTime = new Date(`1970-01-01T${start}:00`);
+            let endTime = new Date(`1970-01-01T${end}:00`);
+            if (endTime < startTime) endTime.setDate(endTime.getDate() + 1); // Handle past midnight
+            const totalMinutesPerDay = (endTime - startTime) / 60000;
+            
+            // Create study blocks (45 mins study + 15 mins break)
+            const blocksPerDay = Math.floor(totalMinutesPerDay / 60);
+            const totalBlocks = blocksPerDay * days;
+            
+            // Distribute chapters across available blocks
+            let schedule = [];
+            let chapterIndex = 0;
+            
+            for (let d = 1; d <= days; d++) {
+                let daySchedule = { day: d, slots: [] };
+                let currentTime = new Date(startTime);
+                
+                for (let b = 0; b < blocksPerDay; b++) {
+                    let slotStart = currentTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                    currentTime.setMinutes(currentTime.getMinutes() + 45);
+                    let slotEnd = currentTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                    
+                    let targetChapter = chapters[chapterIndex % chapters.length];
+                    
+                    daySchedule.slots.push({
+                        time: `${slotStart} - ${slotEnd}`,
+                        task: `Study: ${targetChapter}`,
+                        completed: false,
+                        id: `slot-${d}-${b}`
+                    });
+                    
+                    chapterIndex++;
+                    
+                    // Add 15 min break
+                    currentTime.setMinutes(currentTime.getMinutes() + 15);
+                }
+                schedule.push(daySchedule);
+            }
+
+            currentExamPlan = { name, days, schedule };
+            localStorage.setItem('quantum_exam_plan', JSON.stringify(currentExamPlan));
+            
+            document.getElementById('exam-setup-container').classList.add('hidden');
+            document.getElementById('exam-timetable-container').classList.remove('hidden');
+            renderTimetableUI();
+            showToast("Custom timetable generated!", "success");
+        }
+
+        function renderTimetableUI() {
+            if (!currentExamPlan) return;
+            document.getElementById('display-exam-name').innerText = currentExamPlan.name;
+            document.getElementById('display-exam-meta').innerText = `${currentExamPlan.days} Days Preparation Plan`;
+            
+            const container = document.getElementById('timetable-schedule');
+            container.innerHTML = currentExamPlan.schedule.map(day => `
+                <div class="glass-panel p-4 rounded-xl border border-white/5">
+                    <h4 class="font-bold text-neon-purple border-b border-white/10 pb-2 mb-3">Day ${day.day}</h4>
+                    <div class="space-y-2">
+                        ${day.slots.map(slot => `
+                            <div class="flex items-center gap-3 bg-dark-bg/50 p-2 rounded-lg border border-white/5 ${slot.completed ? 'opacity-50' : ''}">
+                                <input type="checkbox" id="${slot.id}" ${slot.completed ? 'checked' : ''} onchange="toggleExamSlot('${day.day}', '${slot.id}')" class="w-5 h-5 rounded border-white/20 text-neon-purple focus:ring-neon-purple bg-dark-bg cursor-pointer">
+                                <div class="flex-1">
+                                    <span class="text-xs text-slate-400 block">${slot.time}</span>
+                                    <label for="${slot.id}" class="text-sm text-white cursor-pointer ${slot.completed ? 'line-through' : ''}">${slot.task}</label>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function toggleExamSlot(dayNum, slotId) {
+            const dayIndex = currentExamPlan.schedule.findIndex(d => d.day == dayNum);
+            const slotIndex = currentExamPlan.schedule[dayIndex].slots.findIndex(s => s.id === slotId);
+            
+            const isCompleted = !currentExamPlan.schedule[dayIndex].slots[slotIndex].completed;
+            currentExamPlan.schedule[dayIndex].slots[slotIndex].completed = isCompleted;
+            
+            localStorage.setItem('quantum_exam_plan', JSON.stringify(currentExamPlan));
+            renderTimetableUI();
+            
+            if (isCompleted) {
+                if(typeof addXP === 'function') addXP(15);
+                showToast("Slot completed! +15 XP", "success");
+            }
+        }
+
+        function resetExamPlan() {
+            if(confirm("Are you sure you want to clear your current exam plan?")) {
+                localStorage.removeItem('quantum_exam_plan');
+                currentExamPlan = null;
+                document.getElementById('exam-setup-container').classList.remove('hidden');
+                document.getElementById('exam-timetable-container').classList.add('hidden');
+                document.getElementById('exam-planner-form').reset();
+            }
+        }
+
+        // Load the plan if it already exists when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            loadExamPlan();
+        });
     </script>
 </body>
 </html>
