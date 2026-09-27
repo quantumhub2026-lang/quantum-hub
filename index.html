@@ -2778,15 +2778,18 @@ plt.show = custom_show
         document.addEventListener('DOMContentLoaded', () => {
             loadExamPlan();
         });
-        // Automatically toggle SAT/AP resource box when clicking any tab or button
+        // Robust SAT/AP Resource Box Toggle
     document.addEventListener('click', (e) => {
-        const text = e.target.innerText ? e.target.innerText.toUpperCase() : '';
+        const target = e.target.closest('button, a, div');
+        if (!target) return;
+        
+        const content = (target.innerText + ' ' + target.id + ' ' + target.className).toUpperCase();
         const resourceContainer = document.getElementById('sat-ap-resources');
         
         if (resourceContainer) {
-            if (text.includes('SAT') || text.includes('AP')) {
+            if (content.includes('SAT') || content.includes('AP')) {
                 resourceContainer.classList.remove('hidden');
-            } else if (text.includes('CBSE') || text.includes('JEE') || text.includes('NEET') || text.includes('DASHBOARD')) {
+            } else if (content.includes('CBSE') || content.includes('JEE') || content.includes('NEET') || content.includes('DASHBOARD')) {
                 resourceContainer.classList.add('hidden');
             }
         }
