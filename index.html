@@ -2718,6 +2718,157 @@ plt.show = custom_show
         document.addEventListener('DOMContentLoaded', () => {
             loadExamPlan();
         });
+        let currentExamPlan = null;
+
+        function loadExamPlan() {
+            const savedPlan = localStorage.getItem('quantum_exam_plan');
+            if (savedPlan) {
+                currentExamPlan = JSON.parse(savedPlan);
+                document.getElementById('exam-setup-container').classList.add('hidden');
+                document.getElementById('exam-timetable-container').classList.remove('hidden');
+                renderTimetableUI();
+            }
+        }
+
+        function generateExamTimetable(e) {
+            e.preventDefault();
+            const name = document.getElementById('exam-name').value;
+            const days = parseInt(document.getElementById('exam-days').value);
+            const start = document.getElementById('exam-start-time').value;
+            const end = document.getElementById('exam-end-time').value;
+            const chaptersRaw = document.getElementById('exam-chapters').value;
+            
+            const chapters = chaptersRaw.split(',').map(c => c.trim()).filter(c => c);
+            
+            // Calculate total minutes available per day
+            const startTime = new Date(`1970-01-01T${start}:00`);
+            let endTime = new Date(`1970-01-01T${end}:00`);
+            if (endTime < startTime) endTime.setDate(endTime.getDate() + 1); // Handle past midnight
+            const totalMinutesPerDay = (endTime - startTime) / 60000;
+            
+            // Create study blocks (45 mins study + 15 mins break)
+            const blocksPerDay = Math.floor(totalMinutesPerDay / 60);
+            
+            // Distribute chapters across available blocks
+            let schedule = [];
+            let chapterIndex = 0;
+            
+            for (let d = 1; d <= days; d++) {
+                let daySchedule = { day: d, slots: [] };
+                let currentTime = new Date(startTime);
+                
+                for (let b = 0; b < blocksPerDay; b++) {
+                    let slotStart = currentTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                    currentTime.setMinutes(currentTime.getMinutes() + 45);
+                    let slotEnd = currentTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                    
+                    let targetChapter = chapters[chapterIndex % chapters.length];
+                    
+                    // 1. Add Study Block
+                    daySchedule.slots.push({
+                        type: 'study',
+                        time: `${slotStart} - ${slotEnd}`,
+                        task: `Study: ${targetChapter}`,
+                        completed: false,
+                        id: `slot-${d}-${b}`
+                    });
+                    
+                    chapterIndex++;
+                    
+                    // 2. Add Break Block (Skip break if it's the final block of the day)
+                    let breakStart = slotEnd;
+                    currentTime.setMinutes(currentTime.getMinutes() + 15);
+                    let breakEnd = currentTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                    
+                    if (b < blocksPerDay - 1) {
+                        daySchedule.slots.push({
+                            type: 'break',
+                            time: `${breakStart} - ${breakEnd}`,
+                            task: `15-Min Break`,
+                            id: `break-${d}-${b}`
+                        });
+                    }
+                }
+                schedule.push(daySchedule);
+            }
+
+            currentExamPlan = { name, days, schedule };
+            localStorage.setItem('quantum_exam_plan', JSON.stringify(currentExamPlan));
+            
+            document.getElementById('exam-setup-container').classList.add('hidden');
+            document.getElementById('exam-timetable-container').classList.remove('hidden');
+            renderTimetableUI();
+            showToast("Custom timetable generated!", "success");
+        }
+
+        function renderTimetableUI() {
+            if (!currentExamPlan) return;
+            document.getElementById('display-exam-name').innerText = currentExamPlan.name;
+            document.getElementById('display-exam-meta').innerText = `${currentExamPlan.days} Days Preparation Plan`;
+            
+            const container = document.getElementById('timetable-schedule');
+            container.innerHTML = currentExamPlan.schedule.map(day => `
+                <div class="glass-panel p-4 rounded-xl border border-white/5">
+                    <h4 class="font-bold text-neon-purple border-b border-white/10 pb-2 mb-3">Day ${day.day}</h4>
+                    <div class="space-y-2">
+                        ${day.slots.map(slot => {
+                            if (slot.type === 'break') {
+                                return `
+                                <div class="flex items-center gap-3 bg-neon-blue/10 p-2 rounded-lg border border-neon-blue/20 shadow-inner">
+                                    <div class="w-5 h-5 flex justify-center items-center text-neon-blue"><i class="fa-solid fa-clock"></i></div>
+                                    <div class="flex-1">
+                                        <span class="text-xs text-neon-blue/70 block">${slot.time}</span>
+                                        <span class="text-sm text-neon-blue font-bold tracking-wide"><i class="fa-solid fa-bell mr-1 animate-pulse"></i> ${slot.task}</span>
+                                    </div>
+                                </div>
+                                `;
+                            } else {
+                                return `
+                                <div class="flex items-center gap-3 bg-dark-bg/50 p-2 rounded-lg border border-white/5 ${slot.completed ? 'opacity-50' : ''}">
+                                    <input type="checkbox" id="${slot.id}" ${slot.completed ? 'checked' : ''} onchange="toggleExamSlot('${day.day}', '${slot.id}')" class="w-5 h-5 rounded border-white/20 text-neon-purple focus:ring-neon-purple bg-dark-bg cursor-pointer">
+                                    <div class="flex-1">
+                                        <span class="text-xs text-slate-400 block">${slot.time}</span>
+                                        <label for="${slot.id}" class="text-sm text-white cursor-pointer ${slot.completed ? 'line-through' : ''}">${slot.task}</label>
+                                    </div>
+                                </div>
+                                `;
+                            }
+                        }).join('')}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function toggleExamSlot(dayNum, slotId) {
+            const dayIndex = currentExamPlan.schedule.findIndex(d => d.day == dayNum);
+            const slotIndex = currentExamPlan.schedule[dayIndex].slots.findIndex(s => s.id === slotId);
+            
+            const isCompleted = !currentExamPlan.schedule[dayIndex].slots[slotIndex].completed;
+            currentExamPlan.schedule[dayIndex].slots[slotIndex].completed = isCompleted;
+            
+            localStorage.setItem('quantum_exam_plan', JSON.stringify(currentExamPlan));
+            renderTimetableUI();
+            
+            if (isCompleted) {
+                if(typeof addXP === 'function') addXP(15);
+                showToast("Slot completed! +15 XP", "success");
+            }
+        }
+
+        function resetExamPlan() {
+            if(confirm("Are you sure you want to clear your current exam plan?")) {
+                localStorage.removeItem('quantum_exam_plan');
+                currentExamPlan = null;
+                document.getElementById('exam-setup-container').classList.remove('hidden');
+                document.getElementById('exam-timetable-container').classList.add('hidden');
+                document.getElementById('exam-planner-form').reset();
+            }
+        }
+
+        // Load the plan if it already exists when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            loadExamPlan();
+        });
     </script>
 </body>
 </html>
