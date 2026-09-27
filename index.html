@@ -1283,6 +1283,10 @@
                     setTimeout(() => overlay.classList.add('hidden'), 300);
                     
                     document.getElementById('nav-user-email').innerText = email.split('@')[0];
+                    
+                    // FIX: Save the login session so refresh doesn't log you out
+                    localStorage.setItem('quantum_active_session', email);
+                    
                     window.initDataListener("local-simulated-uid");
                     showToast(`${isSignUpMode ? 'Account Created' : 'Signed In'} (Local Simulated Mode)`, 'success');
                     
@@ -1330,7 +1334,13 @@
         }
 
         async function logoutUser() {
-            if (window.isSimulated) { resetUIForLogout(); showToast("Logged out successfully.", "info"); return; }
+            if (window.isSimulated) { 
+                // FIX: Clear the saved login session on manual logout
+                localStorage.removeItem('quantum_active_session');
+                resetUIForLogout(); 
+                showToast("Logged out successfully.", "info"); 
+                return; 
+            }
             if (window.auth) { try { await window.signOut(window.auth); resetUIForLogout(); } catch (error) { console.error("Logout error", error); } }
         }
         
@@ -1435,8 +1445,22 @@
             });
             initPythonEnv();
             if (typeof hljs !== 'undefined') hljs.highlightAll(); 
-        };
 
+            // FIX: Auto-Login check on refresh
+            if (window.isSimulated) {
+                const savedEmail = localStorage.getItem('quantum_active_session');
+                if (savedEmail) {
+                    const overlay = document.getElementById('auth-overlay');
+                    overlay.classList.add('hidden');
+                    document.getElementById('nav-user-email').innerText = savedEmail.split('@')[0];
+                    window.initDataListener("local-simulated-uid");
+                    
+                    if (savedEmail.toLowerCase() === 'quantumhub2026@gmail.com') {
+                        document.getElementById('nav-admin').classList.remove('hidden');
+                    }
+                }
+            }
+        };
         window.addEventListener('DOMContentLoaded', () => {
             setTimerMode(25);
         });
