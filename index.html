@@ -2322,24 +2322,30 @@ plt.show = custom_show
             });
         }
 
-        function playAlarmSound() {
+       function playAlarmSound() {
             try {
                 const ctx = new (window.AudioContext || window.webkitAudioContext)();
-                for (let i = 0; i < 3; i++) {
+                // A pleasant 3-note chime (C5, E5, G5)
+                const notes = [523.25, 659.25, 783.99]; 
+                notes.forEach((freq, i) => {
                     setTimeout(() => {
                         const osc = ctx.createOscillator();
                         const gain = ctx.createGain();
                         osc.connect(gain);
                         gain.connect(ctx.destination);
-                        osc.type = 'sine'; 
-                        osc.frequency.setValueAtTime(880, ctx.currentTime); 
-                        osc.frequency.exponentialRampToValueAtTime(440, ctx.currentTime + 0.5); 
-                        gain.gain.setValueAtTime(1, ctx.currentTime);
-                        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 1);
+                        
+                        osc.type = 'triangle'; // Smoother, softer bell-like sound
+                        osc.frequency.setValueAtTime(freq, ctx.currentTime);
+                        
+                        // Gentle fade out so it doesn't click or pop
+                        gain.gain.setValueAtTime(0, ctx.currentTime);
+                        gain.gain.linearRampToValueAtTime(0.5, ctx.currentTime + 0.1);
+                        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 1.2);
+                        
                         osc.start(ctx.currentTime);
-                        osc.stop(ctx.currentTime + 1);
-                    }, i * 600); 
-                }
+                        osc.stop(ctx.currentTime + 1.5);
+                    }, i * 300); // 300ms delay between each note
+                });
             } catch(e) { console.log("Audio not supported or blocked."); }
         }
         
