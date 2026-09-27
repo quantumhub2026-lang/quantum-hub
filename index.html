@@ -113,6 +113,15 @@
     </style>
 </head>
 <body class="h-screen w-full flex overflow-hidden selection:bg-neon-purple selection:text-white relative">
+    <!-- QUANTUM BACKGROUND DESIGN -->
+    <div class="fixed inset-0 z-[-1] bg-[#09090b] overflow-hidden">
+        <!-- Subtle Tech Grid -->
+        <div class="absolute inset-0 bg-[linear-gradient(to_right,#ffffff0a_1px,transparent_1px),linear-gradient(to_bottom,#ffffff0a_1px,transparent_1px)] bg-[size:32px_32px]"></div>
+        
+        <!-- Glowing Quantum Orbs -->
+        <div class="absolute top-[-15%] left-[-10%] w-[500px] h-[500px] rounded-full bg-purple-600/20 blur-[120px] animate-pulse"></div>
+        <div class="absolute bottom-[-15%] right-[-10%] w-[600px] h-[600px] rounded-full bg-blue-600/20 blur-[120px] animate-pulse" style="animation-delay: 2s;"></div>
+    </div>
 
     <!-- Authentication Overlay -->
     <div id="auth-overlay" class="fixed inset-0 z-[100] bg-dark-bg/95 backdrop-blur-md flex items-center justify-center transition-opacity duration-300">
