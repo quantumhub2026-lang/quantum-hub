@@ -1347,9 +1347,15 @@
         }
 
         // --- FIREBASE SYNC LOGIC ---
-        window.initDataListener = async (userId) => {
+       window.initDataListener = async (userId) => {
             if (window.isSimulated) {
-                userData.syllabus = JSON.parse(JSON.stringify(TRACK_SYLLABI[userData.track] || TRACK_SYLLABI['CBSE_12']));
+                // FIX: Load the saved data when the app opens
+                const savedData = localStorage.getItem('quantum_userData');
+                if (savedData) {
+                    userData = { ...userData, ...JSON.parse(savedData) };
+                } else {
+                    userData.syllabus = JSON.parse(JSON.stringify(TRACK_SYLLABI[userData.track] || TRACK_SYLLABI['CBSE_12']));
+                }
                 const selector = document.getElementById('track-selector');
                 if (selector) selector.value = userData.track;
                 checkActivityAndStreak();
@@ -1402,8 +1408,12 @@
             });
         };
 
-        async function saveUserData() {
-            if (window.isSimulated) return;
+       async function saveUserData() {
+            // FIX: Save data to the browser memory in simulated mode
+            if (window.isSimulated) {
+                localStorage.setItem('quantum_userData', JSON.stringify(userData));
+                return;
+            }
             if (!window.auth || !window.auth.currentUser) return;
             try {
                 const docRef = window.doc(window.db, 'artifacts', window.appId, 'users', window.auth.currentUser.uid, 'profile', 'data');
