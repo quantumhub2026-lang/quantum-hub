@@ -345,7 +345,7 @@
                     <p class="text-slate-400">Your central command for academic mastery.</p>
                 </header>
 <!-- College Board & Khan Academy Link Container -->
-        <div id="sat-ap-resources" class="hidden mb-6 p-5 glass-panel rounded-2xl border border-neon-purple/30 animate-fade-in flex flex-col md:flex-row items-center justify-between gap-4">
+        <div id="sat-ap-resources" class="mb-6 p-5 glass-panel rounded-2xl border border-neon-purple/30 animate-fade-in flex flex-col md:flex-row items-center justify-between gap-4">
             <div>
                 <h4 class="text-white font-bold text-lg mb-1">Official Prep Portal</h4>
                 <p class="text-xs text-slate-400 italic">"Khan academy will help in studing for all"</p>
@@ -2778,18 +2778,21 @@ plt.show = custom_show
         document.addEventListener('DOMContentLoaded', () => {
             loadExamPlan();
         });
-        // Robust SAT/AP Resource Box Toggle
+       // Robust SAT/AP Portal Toggle
     document.addEventListener('click', (e) => {
-        const target = e.target.closest('button, a, div');
-        if (!target) return;
+        const btn = e.target.closest('button, a, div, span');
+        if (!btn) return;
         
-        const content = (target.innerText + ' ' + target.id + ' ' + target.className).toUpperCase();
+        const text = (btn.innerText + ' ' + btn.id).toUpperCase();
         const resourceContainer = document.getElementById('sat-ap-resources');
         
         if (resourceContainer) {
-            if (content.includes('SAT') || content.includes('AP')) {
+            // If user clicks anything related to SAT or AP
+            if (text.includes('SAT') || text.includes('AP')) {
                 resourceContainer.classList.remove('hidden');
-            } else if (content.includes('CBSE') || content.includes('JEE') || content.includes('NEET') || content.includes('DASHBOARD')) {
+            } 
+            // If user clicks Dashboard, CBSE, JEE, NEET, or Syllabus
+            else if (text.includes('DASHBOARD') || text.includes('CBSE') || text.includes('JEE') || text.includes('NEET') || text.includes('SYLLABUS')) {
                 resourceContainer.classList.add('hidden');
             }
         }
