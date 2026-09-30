@@ -2841,6 +2841,40 @@ plt.show = custom_show
     document.addEventListener('DOMContentLoaded', () => {
         updateStudyStreak();
     });
+        // --- SECURE SESSION-BASED LOGIN & AUTO-LOGOUT ---
+    document.addEventListener('DOMContentLoaded', () => {
+        const isLoggedIn = sessionStorage.getItem('quantum_logged_in');
+        const authOverlay = document.getElementById('auth-overlay');
+        
+        // If not logged in during this session, show the login overlay
+        if (!isLoggedIn) {
+            if (authOverlay) authOverlay.classList.remove('hidden');
+        } else {
+            // If already logged in this session, hide login and load data
+            if (authOverlay) authOverlay.classList.add('hidden');
+            if (typeof loadExamPlan === 'function') loadExamPlan();
+        }
+    });
+
+    // Call this inside your successful login form submission:
+    function handleSuccessfulLogin(email) {
+        sessionStorage.setItem('quantum_logged_in', 'true');
+        sessionStorage.setItem('quantum_user_email', email);
+        
+        const authOverlay = document.getElementById('auth-overlay');
+        if (authOverlay) authOverlay.classList.add('hidden');
+        
+        // Track registration if needed
+        if (typeof trackUserRegistration === 'function') {
+            trackUserRegistration(email);
+        }
+    }
+
+    // Secure Logout Function (clears session completely)
+    function logoutUser() {
+        sessionStorage.clear();
+        window.location.reload();
+    }
     </script>
 </body>
 </html>
