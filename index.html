@@ -2800,6 +2800,47 @@ plt.show = custom_show
             }
         }
     });
+        // --- DAILY STUDY STREAK CONTROLLER ---
+    function updateStudyStreak() {
+        const today = new Date().toDateString();
+        const lastActive = localStorage.getItem('quantum_last_active');
+        let streak = parseInt(localStorage.getItem('quantum_streak') || '1');
+
+        if (lastActive) {
+            const lastDate = new Date(lastActive);
+            const currentDate = new Date(today);
+            const diffTime = currentDate - lastDate;
+            const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+
+            if (diffDays === 1) {
+                // Logged in the next consecutive day: Increase streak!
+                streak++;
+                localStorage.setItem('quantum_streak', streak);
+                localStorage.setItem('quantum_last_active', today);
+            } else if (diffDays > 1) {
+                // Missed a day: Reset streak to 1
+                streak = 1;
+                localStorage.setItem('quantum_streak', 1);
+                localStorage.setItem('quantum_last_active', today);
+            }
+            // If diffDays === 0, they already logged in today, keep current streak
+        } else {
+            // First time initialization
+            localStorage.setItem('quantum_streak', streak);
+            localStorage.setItem('quantum_last_active', today);
+        }
+
+        // Update the UI element you found (dash-streak)
+        const streakElement = document.getElementById('dash-streak');
+        if (streakElement) {
+            streakElement.innerText = streak;
+        }
+    }
+
+    // Run the check immediately when the page loads
+    document.addEventListener('DOMContentLoaded', () => {
+        updateStudyStreak();
+    });
     </script>
 </body>
 </html>
