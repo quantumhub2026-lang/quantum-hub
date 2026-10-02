@@ -2801,46 +2801,36 @@ plt.show = custom_show
         }
     });
         // --- DAILY STUDY STREAK CONTROLLER ---
-    function updateStudyStreak() {
-        const today = new Date().toDateString();
-        const lastActive = localStorage.getItem('quantum_last_active');
-        let streak = parseInt(localStorage.getItem('quantum_streak') || '1');
-
-        if (lastActive) {
-            const lastDate = new Date(lastActive);
-            const currentDate = new Date(today);
-            const diffTime = currentDate - lastDate;
-            const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
-
-            if (diffDays === 1) {
-                // Logged in the next consecutive day: Increase streak!
-                streak++;
-                localStorage.setItem('quantum_streak', streak);
-                localStorage.setItem('quantum_last_active', today);
-            } else if (diffDays > 1) {
-                // Missed a day: Reset streak to 1
-                streak = 1;
-                localStorage.setItem('quantum_streak', 1);
-                localStorage.setItem('quantum_last_active', today);
+   // --- FORCE LOGIN ON FRESH SESSION (SHARED COMPUTER SECURITY) ---
+    document.addEventListener('DOMContentLoaded', () => {
+        const isLoggedIn = sessionStorage.getItem('quantum_logged_in');
+        const authOverlay = document.getElementById('auth-overlay') || document.querySelector('.auth-container');
+        
+        if (!isLoggedIn) {
+            // If no active session for this browser session, force show login overlay
+            if (authOverlay) {
+                authOverlay.classList.remove('hidden');
+                authOverlay.style.display = 'flex';
             }
-            // If diffDays === 0, they already logged in today, keep current streak
-        } else {
-            // First time initialization
-            localStorage.setItem('quantum_streak', streak);
-            localStorage.setItem('quantum_last_active', today);
         }
+    });
 
-        // Update the UI element you found (dash-streak)
-        const streakElement = document.getElementById('dash-streak');
-        if (streakElement) {
-            streakElement.innerText = streak;
+    // Call this inside your login success function when a student signs in:
+    function setSessionLogin(email) {
+        sessionStorage.setItem('quantum_logged_in', 'true');
+        sessionStorage.setItem('quantum_user_email', email);
+        const authOverlay = document.getElementById('auth-overlay') || document.querySelector('.auth-container');
+        if (authOverlay) {
+            authOverlay.classList.add('hidden');
+            authOverlay.style.display = 'none';
         }
     }
 
-    // Run the check immediately when the page loads
-    document.addEventListener('DOMContentLoaded', () => {
-        updateStudyStreak();
-    });
+    // Secure Logout Button Handler
+    function logoutUser() {
+        sessionStorage.clear(); // Wipes current session login
+        window.location.reload(); // Returns directly to login screen
+    }
         // --- SECURE SESSION-BASED LOGIN & AUTO-LOGOUT ---
     document.addEventListener('DOMContentLoaded', () => {
         const isLoggedIn = sessionStorage.getItem('quantum_logged_in');
